@@ -16,17 +16,33 @@ import gerenciadores.GerenciadorSom;
 public class MenuPanel extends JPanel {
 
     private Image fundo;
+    private ImageIcon gifIcon;
 
     public MenuPanel(GerenciadorTelas janela) {
 
-        fundo = new ImageIcon(
+        gifIcon = new ImageIcon(
 			getClass().getResource(
-				"/assets/telas/telaInicial.png"
+				"/assets/telas/telaInicial.gif"
 			)
-		).getImage();
+		);
         
+        fundo = gifIcon.getImage();
 
         setLayout(null);
+
+        // repinta enquanto anima
+        new javax.swing.Timer(16, e -> repaint()).start();
+
+        // reinicia a cada 5 segundos
+        new javax.swing.Timer(5000, e -> {
+            gifIcon = new ImageIcon(
+                getClass().getResource("/assets/telaInicial/telaInicial.gif")
+            );
+
+            fundo = gifIcon.getImage();
+
+            repaint();
+        }).start();
 
         JButton btnJogar = new JButton("");
 
