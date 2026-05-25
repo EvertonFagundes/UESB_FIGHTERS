@@ -33,17 +33,6 @@ public class MenuPanel extends JPanel {
         // repinta enquanto anima
         new javax.swing.Timer(16, e -> repaint()).start();
 
-        // reinicia a cada 5 segundos
-        new javax.swing.Timer(5000, e -> {
-            gifIcon = new ImageIcon(
-                getClass().getResource("/assets/telaInicial/telaInicial.gif")
-            );
-
-            fundo = gifIcon.getImage();
-
-            repaint();
-        }).start();
-
         JButton btnJogar = new JButton("");
 
         btnJogar.setBounds(510, 520, 250, 60);
@@ -57,7 +46,6 @@ public class MenuPanel extends JPanel {
         btnJogar.setBorder(null);
 
         btnJogar.addActionListener(e -> {
-            // janela.trocarTela(new GamePanel(janela));
             janela.trocarTela(new SelecaoPanel(janela));
         });
 

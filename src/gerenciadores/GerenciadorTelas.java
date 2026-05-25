@@ -7,6 +7,8 @@ import telas.*;
 
 public class GerenciadorTelas extends JFrame {
 
+    private InputManager input = new InputManager();
+
     public GerenciadorTelas() {
 
         setTitle("UESB Fighters");
@@ -19,19 +21,35 @@ public class GerenciadorTelas extends JFrame {
 
         setResizable(false);
 
+        addKeyListener(input);
+
+        setFocusable(true);
+
+        requestFocus();
+
         add(new MenuPanel(this));
 
         setVisible(true);
+
+
     }
 
     public void trocarTela(JPanel painel) {
 
-		getContentPane().removeAll();
+        getContentPane().removeAll();
 
-		add(painel);
+        add(painel);
 
-		revalidate();
+        revalidate();
 
-		repaint();
-	}
+        repaint();
+
+        javax.swing.SwingUtilities
+            .invokeLater(() -> {
+
+                requestFocus();
+
+                painel.requestFocusInWindow();
+            });
+    }
 }
