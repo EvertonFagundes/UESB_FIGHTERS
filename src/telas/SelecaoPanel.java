@@ -277,10 +277,12 @@ public class SelecaoPanel extends JPanel {
                 "Player 2 escolheu: " + player2
             );
 
-            System.out.println("INICIAR LUTA!");
+            System.out.println("Personagens escolhidos, seguindo para seleção de cenário");
 
             //troca de tela
-            janela.trocarTela(new GamePanel(janela));
+            janela.trocarTela(
+                new SelecaoCenarioPanel(janela, player1, player2)
+            );
         }
     }
 
