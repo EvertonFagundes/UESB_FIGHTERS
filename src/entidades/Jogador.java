@@ -22,7 +22,7 @@ public class Jogador extends Personagem {
 
     public Jogador(int x, int y, boolean viradoDireita) {
 
-        super(x, y, 210, 280, 100, 6);
+        super(x, y, 300, 400, 100, 6, 10);
 
         this.viradoDireita = viradoDireita;
 
@@ -96,8 +96,8 @@ public class Jogador extends Personagem {
     }
 
     @Override
-    public void atacar() {
-        iniciarAtaque();
+    public void atacar(int tipoGolpe) {
+        iniciarAtaque(tipoGolpe);
     }
 
     public void moverDireita() {

@@ -40,12 +40,21 @@ public abstract class Personagem {
     // controle da animação parado/idle
     protected int contadorAnimacao;
 
+    // poder de ataque do personagem
+    protected int forca;
+
+    // dano do golpe que está em andamento
+    protected int danoGolpeAtual;
+
+    // impede que o mesmo golpe acerte várias vezes seguidas
+    protected boolean golpeAcertou;
+
     protected static final int GRAVIDADE = 1;
     protected static final int FORCA_PULO = -18;
     protected static final int DURACAO_ATAQUE = 15;
     protected static final int VELOCIDADE_ANIMACAO = 20;
 
-    public Personagem(int x, int y, int largura, int altura, int vida, int velocidade) {
+    public Personagem(int x, int y, int largura, int altura, int vida, int velocidade, int forca) {
 
         this.x = x;
         this.y = y;
@@ -55,6 +64,7 @@ public abstract class Personagem {
 
         this.vida = vida;
         this.velocidade = velocidade;
+        this.forca = forca;
 
 		this.frameAtual = 0;
 
@@ -69,6 +79,8 @@ public abstract class Personagem {
         this.velocidadeY = 0;
         this.temporizadorAtaque = 0;
         this.contadorAnimacao = 0;
+        this.danoGolpeAtual = 0;
+        this.golpeAcertou = true;
     }
 
     // Inicia o pulo (só funciona se o personagem já estiver no chão)
@@ -96,10 +108,54 @@ public abstract class Personagem {
         }
     }
 
-    // Marca o início do ataque; o subtipo chama isso dentro de atacar()
-    protected void iniciarAtaque() {
+    // Marca o início do ataque; o subtipo chama isso dentro de atacar(tipoGolpe).
+    // tipoGolpe: 1 = golpe leve, 2 = médio, 3 = forte
+    protected void iniciarAtaque(int tipoGolpe) {
         atacando = true;
         temporizadorAtaque = DURACAO_ATAQUE;
+        danoGolpeAtual = calcularDano(tipoGolpe);
+        golpeAcertou = false;
+    }
+
+    // Dano = força do personagem + bônus do golpe usado.
+    // Pode ser sobrescrito por um personagem com golpes especiais.
+    protected int calcularDano(int tipoGolpe) {
+
+        int bonusGolpe;
+
+        switch (tipoGolpe) {
+            case 1:
+                bonusGolpe = 2;
+                break;
+            case 2:
+                bonusGolpe = 5;
+                break;
+            case 3:
+                bonusGolpe = 9;
+                break;
+            default:
+                bonusGolpe = 2;
+        }
+
+        return forca + bonusGolpe;
+    }
+
+    // Área de colisão real, um pouco menor que o sprite inteiro
+    // (a foto recortada tem bastante espaço vazio ao redor)
+    public Hitbox getHitbox() {
+
+        int insetX = (int) (largura * 0.2);
+        int insetYTopo = (int) (altura * 0.2);
+
+        int hitboxLargura = (int) (largura * 0.6);
+        int hitboxAltura = (int) (altura * 0.75);
+
+        return new Hitbox(
+            x + insetX,
+            y + insetYTopo,
+            hitboxLargura,
+            hitboxAltura
+        );
     }
 
     // Conta quanto falta pro golpe atual terminar
@@ -134,7 +190,7 @@ public abstract class Personagem {
 
     public abstract void desenhar(Graphics g);
 
-    public abstract void atacar();
+    public abstract void atacar(int tipoGolpe);
 
     // Hitbox do personagem
     public Rectangle getBounds() {
@@ -211,6 +267,22 @@ public abstract class Personagem {
 
     public void setPulando(boolean pulando) {
         this.pulando = pulando;
+    }
+
+    public int getForca() {
+        return forca;
+    }
+
+    public int getDanoGolpeAtual() {
+        return danoGolpeAtual;
+    }
+
+    public boolean isGolpeAcertou() {
+        return golpeAcertou;
+    }
+
+    public void setGolpeAcertou(boolean golpeAcertou) {
+        this.golpeAcertou = golpeAcertou;
     }
 
 	public Image[] getParado() {
