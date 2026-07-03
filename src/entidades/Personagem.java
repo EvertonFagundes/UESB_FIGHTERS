@@ -1,11 +1,13 @@
 package entidades;
 
+import enums.Estado;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
+import gerenciadores.InputManager;
 
 public abstract class Personagem {
-
+    
     protected int x;
     protected int y;
 
@@ -16,14 +18,16 @@ public abstract class Personagem {
 
     protected int velocidade;
 
-    protected boolean atacando;
+    protected Estado estado = Estado.PARADO;
     protected boolean pulando;
-	protected boolean viradoDireita;
+    protected boolean viradoDireita;
+    protected boolean atacando;
 	
     // animações
     protected Image[] parado;
-    protected Image[] andando;
-    protected Image[] ataque;
+    protected Image[] andar;
+    protected Image[] soco;
+    protected Image[] chute;
     protected Image[] pulo;
     protected Image[] dano;
 
@@ -52,10 +56,11 @@ public abstract class Personagem {
     protected static final int GRAVIDADE = 1;
     protected static final int FORCA_PULO = -18;
     protected static final int DURACAO_ATAQUE = 15;
-    protected static final int VELOCIDADE_ANIMACAO = 20;
+    protected static final int VELOCIDADE_ANIMACAO = 8;
+
+    protected InputManager input;
 
     public Personagem(int x, int y, int largura, int altura, int vida, int velocidade, int forca) {
-
         this.x = x;
         this.y = y;
 
@@ -99,7 +104,7 @@ public abstract class Personagem {
 
             y += velocidadeY;
             velocidadeY += GRAVIDADE;
-
+        
             if (y >= chaoY) {
                 y = chaoY;
                 velocidadeY = 0;
@@ -111,10 +116,26 @@ public abstract class Personagem {
     // Marca o início do ataque; o subtipo chama isso dentro de atacar(tipoGolpe).
     // tipoGolpe: 1 = golpe leve, 2 = médio, 3 = forte
     protected void iniciarAtaque(int tipoGolpe) {
+
+        if(atacando)
+            return;
+
         atacando = true;
-        temporizadorAtaque = DURACAO_ATAQUE;
+
+        if(tipoGolpe == 1){
+
+            mudarEstado(Estado.SOCO);
+
+        }else{
+
+            mudarEstado(Estado.CHUTE);
+
+        }
+
         danoGolpeAtual = calcularDano(tipoGolpe);
+
         golpeAcertou = false;
+
     }
 
     // Dano = força do personagem + bônus do golpe usado.
@@ -159,7 +180,7 @@ public abstract class Personagem {
     }
 
     // Conta quanto falta pro golpe atual terminar
-    protected void atualizarAtaque() {
+    /*protected void atualizarAtaque() {
 
         if (atacando) {
 
@@ -169,21 +190,117 @@ public abstract class Personagem {
                 atacando = false;
             }
         }
+    }*/
+    protected void atualizarAtaque() {
+
+        // A animação controla o ataque.
+        // Quando ela termina, o estado volta para PARADO.
+
     }
 
-    // Alterna entre os frames de "parado" (idle) pra dar vida ao sprite
     protected void atualizarAnimacao() {
 
         contadorAnimacao++;
 
-        if (contadorAnimacao >= VELOCIDADE_ANIMACAO) {
+        if (contadorAnimacao < VELOCIDADE_ANIMACAO)
+            return;
 
             contadorAnimacao = 0;
 
-            if (parado != null && parado.length > 0) {
-                frameAtual = (frameAtual + 1) % parado.length;
+            switch (estado) {
+
+                case PARADO:
+
+                    frameAtual++;
+
+                    if(frameAtual >= parado.length)
+                        frameAtual = 0;
+
+                    break;
+
+                case ANDANDO:
+
+                    frameAtual++;
+
+                    if(frameAtual >= andar.length)
+                        frameAtual = 0;
+
+                    break;
+
+                case SOCO:
+
+                    frameAtual++;
+
+                    if(frameAtual >= soco.length){
+
+                        frameAtual = 0;
+                        atacando = false;
+                        mudarEstado(Estado.PARADO);
+
+                    }
+
+                    break;
+
+                case CHUTE:
+
+                    frameAtual++;
+
+                    if(frameAtual >= chute.length){
+
+                        frameAtual = 0;
+                        atacando = false;
+                        mudarEstado(Estado.PARADO);
+
+                    }
+
+                    break;
+
+                case PULANDO:
+                    break;
             }
-        }
+
+    }
+
+    public void moverDireita() {
+
+        if(atacando)
+            return;
+
+        x += velocidade;
+
+        mudarEstado(Estado.ANDANDO);
+
+    }
+
+    public void moverEsquerda() {
+
+        if(atacando)
+            return;
+
+        x -= velocidade;
+
+        mudarEstado(Estado.ANDANDO);
+
+    }
+
+    public void parar(){
+
+        if(atacando)
+            return;
+
+        mudarEstado(Estado.PARADO);
+
+    }
+
+    protected void mudarEstado(Estado novoEstado) {
+
+        if (estado == novoEstado)
+            return;
+
+        estado = novoEstado;
+
+        frameAtual = 0;
+        contadorAnimacao = 0;
     }
 
     public abstract void atualizar();
@@ -293,20 +410,28 @@ public abstract class Personagem {
 		this.parado = parado;
 	}
 
-	public Image[] getAndando() {
-		return andando;
+	public Image[] getAndar() {
+		return andar;
 	}
 
-	public void setAndando(Image[] andando) {
-		this.andando = andando;
+	public void setAndar(Image[] andando) {
+		this.andar = andar;
 	}
 
-	public Image[] getAtaque() {
-		return ataque;
+	public Image[] getSoco() {
+		return soco;
 	}
 
-	public void setAtaque(Image[] ataque) {
-		this.ataque = ataque;
+    public Image[] getChute() {
+		return chute;
+	}
+
+	public void setSoco(Image[] soco) {
+		this.soco = soco;
+	}
+
+    public void setChute(Image[] chute) {
+		this.chute = chute;
 	}
 
 	public Image[] getPulo() {

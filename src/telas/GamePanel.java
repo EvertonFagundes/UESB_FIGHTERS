@@ -1,5 +1,8 @@
 package telas;
 
+import entidades.Jogador;
+import gerenciadores.GerenciadorTelas;
+import gerenciadores.InputManager;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -9,15 +12,12 @@ import java.awt.event.KeyListener;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import entidades.Jogador;
-import gerenciadores.GerenciadorTelas;
-
-public class GamePanel extends JPanel implements KeyListener {
+public class GamePanel extends JPanel {
 
     private static final int FPS = 60;
 
@@ -54,6 +54,7 @@ public class GamePanel extends JPanel implements KeyListener {
     private boolean jogoEncerrado = false;
     private boolean acabouPorTempo = false;
     private String mensagemFinal = "";
+    private InputManager inputManager;
 
     public GamePanel(
         GerenciadorTelas janela,
@@ -62,30 +63,36 @@ public class GamePanel extends JPanel implements KeyListener {
         String arquivoCenario
     ) {
 
-        this.indicePersonagem1 = player1;
-        this.indicePersonagem2 = player2;
-
-        setFocusable(true);
-        addKeyListener(this);
-
-        URL cenarioUrl = getClass().getResource(
-            "/assets/cenarios/" + arquivoCenario
-        );
+        URL cenarioUrl = getClass().getResource("/assets/cenarios/" + arquivoCenario);
 
         if (cenarioUrl != null) {
             cenario = new ImageIcon(cenarioUrl).getImage();
         }
 
-        // personagens maiores, mais de acordo com o tamanho do cenário
-        jogador1 = new Jogador(100, 280, true);
-        jogador2 = new Jogador(880, 280, false);
+        inputManager = new InputManager();
+        addKeyListener(inputManager);
+        System.out.println("INPUT OK");
+
+        setFocusable(true);
+        requestFocusInWindow();
+
+        jogador1 = new Jogador(player1, 100, 280, true, inputManager, 1);
+        jogador2 = new Jogador(player2, 880, 280, false, inputManager, 2);
+
+        carregarCenario(arquivoCenario);
 
         loop = new Timer(1000 / FPS, e -> {
             atualizarJogo();
             repaint();
         });
-
         loop.start();
+
+        setFocusable(true);
+        requestFocusInWindow();
+
+        SwingUtilities.invokeLater(() -> {
+            requestFocusInWindow();
+        });
     }
 
     // para o loop quando essa tela sai de cena, evitando
@@ -101,40 +108,11 @@ public class GamePanel extends JPanel implements KeyListener {
 
     private void atualizarJogo() {
 
-        if (jogoEncerrado) {
-            return;
-        }
-
-        // ---- movimento jogador 1 (WASD) ----
-        if (estaPressionada(KeyEvent.VK_A)) {
-            jogador1.moverEsquerda();
-        }
-
-        if (estaPressionada(KeyEvent.VK_D)) {
-            jogador1.moverDireita();
-        }
-
-        if (estaPressionada(KeyEvent.VK_W)) {
-            jogador1.pular();
-        }
-
-        // ---- movimento jogador 2 (setas) ----
-        if (estaPressionada(KeyEvent.VK_LEFT)) {
-            jogador2.moverEsquerda();
-        }
-
-        if (estaPressionada(KeyEvent.VK_RIGHT)) {
-            jogador2.moverDireita();
-        }
-
-        if (estaPressionada(KeyEvent.VK_UP)) {
-            jogador2.pular();
-        }
+        if (jogoEncerrado) return;
 
         limitarNaTela(jogador1);
         limitarNaTela(jogador2);
 
-        // cada jogador vira automaticamente pro lado do adversário
         if (jogador1.getX() < jogador2.getX()) {
             jogador1.setViradoDireita(true);
             jogador2.setViradoDireita(false);
@@ -369,8 +347,22 @@ public class GamePanel extends JPanel implements KeyListener {
         g.drawString(mensagemFinal, (getWidth() - larguraMsg) / 2, 350);
     }
 
-    // ---------------- teclado ----------------
+    private void carregarCenario(String arquivoCenario) {
 
+        String path = "/assets/cenarios/" + arquivoCenario;
+
+        URL url = getClass().getResource(path);
+
+        if (url == null) {
+            System.out.println("CENÁRIO NÃO ENCONTRADO: " + path);
+            return;
+        }
+
+        cenario = new ImageIcon(url).getImage();
+    }
+
+    // ---------------- teclado ----------------
+    /*
     @Override
     public void keyPressed(KeyEvent e) {
 
@@ -408,4 +400,5 @@ public class GamePanel extends JPanel implements KeyListener {
     @Override
     public void keyTyped(KeyEvent e) {
     }
+    */
 }
