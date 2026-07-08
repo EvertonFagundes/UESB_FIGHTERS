@@ -94,6 +94,7 @@ public abstract class Personagem {
         if (!pulando) {
             pulando = true;
             velocidadeY = FORCA_PULO;
+            mudarEstado(Estado.PULANDO);
         }
     }
 
@@ -109,6 +110,7 @@ public abstract class Personagem {
                 y = chaoY;
                 velocidadeY = 0;
                 pulando = false;
+                mudarEstado(Estado.PARADO);
             }
         }
     }
@@ -256,6 +258,13 @@ public abstract class Personagem {
                     break;
 
                 case PULANDO:
+
+                    frameAtual++;
+
+                    if (frameAtual >= pulo.length) {
+                        frameAtual = pulo.length - 1;
+                    }
+
                     break;
             }
 

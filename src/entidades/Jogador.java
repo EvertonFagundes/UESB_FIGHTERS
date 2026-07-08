@@ -1,12 +1,11 @@
 package entidades;
 
+import enums.Estado;
+import gerenciadores.InputManager;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.net.URL;
 import javax.swing.ImageIcon;
-
-import enums.Estado;
-import gerenciadores.InputManager;
 
 public class Jogador extends Personagem {
 
@@ -25,6 +24,7 @@ public class Jogador extends Personagem {
         soco = new Image[5];
         andar = new Image[8];
         chute = new Image[4]; // garante que não fica null
+        pulo = new Image[5];
 
         String nomeJogador = "";
 
@@ -58,6 +58,15 @@ public class Jogador extends Personagem {
         andar[5] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/walk_6.png");
         andar[6] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/walk_7.png");
         andar[7] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/walk_8.png");
+
+        //PULO
+        pulo[0] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/jump_1.png");
+        pulo[1] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/jump_2.png");
+        pulo[2] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/jump_3.png");
+        pulo[3] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/jump_4.png");
+        pulo[4] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/jump_5.png");
+
+
     }
 
     private Image carregarImagem(String caminho) {
@@ -98,6 +107,7 @@ public class Jogador extends Personagem {
 
             if (input.puloP1) {
                 pular();
+
             }
 
             if (input.socoP1 && !atacando) {
@@ -142,7 +152,9 @@ public class Jogador extends Personagem {
         // =========================
         // ESTADO
         // =========================
-        if (estado != Estado.SOCO && estado != Estado.CHUTE) {
+        if (estado != Estado.SOCO &&
+            estado != Estado.CHUTE &&
+            estado != Estado.PULANDO) {
 
             if (movendo) {
                 mudarEstado(Estado.ANDANDO);
@@ -181,6 +193,12 @@ public class Jogador extends Personagem {
             case CHUTE:
                 if (chute != null && chute.length > 0) {
                     sprite = chute[frameAtual];
+                }
+                break;
+
+            case PULANDO:
+                if (pulo != null && pulo.length > 0) {
+                    sprite = pulo[frameAtual];
                 }
                 break;
 

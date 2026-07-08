@@ -1,21 +1,19 @@
 package telas;
 
 import entidades.Jogador;
+import gerenciadores.GameLoop;
 import gerenciadores.GerenciadorTelas;
 import gerenciadores.InputManager;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 
 public class GamePanel extends JPanel {
 
@@ -39,7 +37,7 @@ public class GamePanel extends JPanel {
     // teclas que estão sendo seguradas nesse momento
     private final Set<Integer> teclasPressionadas = new HashSet<>();
 
-    private Timer loop;
+    private GameLoop loop;
 
     // guardados pra mostrar o nome certo na barra de vida
     // (os sprites por enquanto são sempre do Everton)
@@ -81,10 +79,7 @@ public class GamePanel extends JPanel {
 
         carregarCenario(arquivoCenario);
 
-        loop = new Timer(1000 / FPS, e -> {
-            atualizarJogo();
-            repaint();
-        });
+        loop = new GameLoop(this);
         loop.start();
 
         setFocusable(true);
@@ -102,11 +97,11 @@ public class GamePanel extends JPanel {
         super.removeNotify();
 
         if (loop != null) {
-            loop.stop();
+            loop.encerrar();
         }
     }
 
-    private void atualizarJogo() {
+    public void atualizarJogo() {
 
         if (jogoEncerrado) return;
 
@@ -360,45 +355,5 @@ public class GamePanel extends JPanel {
 
         cenario = new ImageIcon(url).getImage();
     }
-
-    // ---------------- teclado ----------------
-    /*
-    @Override
-    public void keyPressed(KeyEvent e) {
-
-        teclasPressionadas.add(e.getKeyCode());
-
-        if (jogoEncerrado) {
-            return;
-        }
-
-        // golpes do jogador 1: J leve, K médio, L forte
-        if (e.getKeyCode() == KeyEvent.VK_J) {
-            jogador1.atacar(1);
-        } else if (e.getKeyCode() == KeyEvent.VK_K) {
-            jogador1.atacar(2);
-        } else if (e.getKeyCode() == KeyEvent.VK_L) {
-            jogador1.atacar(3);
-        }
-
-        // golpes do jogador 2: 1 leve, 2 médio, 3 forte
-        // (numpad e a fileira normal de números, pra funcionar em qualquer teclado)
-        if (e.getKeyCode() == KeyEvent.VK_NUMPAD1 || e.getKeyCode() == KeyEvent.VK_1) {
-            jogador2.atacar(1);
-        } else if (e.getKeyCode() == KeyEvent.VK_NUMPAD2 || e.getKeyCode() == KeyEvent.VK_2) {
-            jogador2.atacar(2);
-        } else if (e.getKeyCode() == KeyEvent.VK_NUMPAD3 || e.getKeyCode() == KeyEvent.VK_3) {
-            jogador2.atacar(3);
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        teclasPressionadas.remove(e.getKeyCode());
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-    */
+    
 }
