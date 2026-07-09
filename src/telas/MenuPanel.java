@@ -50,7 +50,7 @@ public class MenuPanel extends JPanel {
         });
 
         add(btnJogar);
-        GerenciadorSom.tocarMusica("/assets/sons/menu.wav");
+        GerenciadorSom.iniciarMusicaMenu();
     }
 
     @Override

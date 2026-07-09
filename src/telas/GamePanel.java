@@ -17,6 +17,7 @@ import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import gerenciadores.GerenciadorSom;
 
 public class GamePanel extends JPanel {
 
@@ -105,6 +106,7 @@ public class GamePanel extends JPanel {
         );
 
         carregarCenario(arquivoCenario);
+        //GerenciadorSom.iniciarMusicaLuta();
         gerenciadorRounds = new GerenciadorRounds();
 
         loop = new GameLoop(this);
@@ -185,9 +187,15 @@ public class GamePanel extends JPanel {
 
         tempoContagem--;
 
-
         if(tempoContagem >= 240){
-
+            if(tempoContagem == 240){
+                if(gerenciadorRounds.getRoundAtual() == 1)
+                    GerenciadorSom.tocarRound1();
+                else if(gerenciadorRounds.getRoundAtual() == 2)
+                    GerenciadorSom.tocarRound2();
+                else
+                    GerenciadorSom.tocarRoundFinal();
+            }
             textoRound = gerenciadorRounds.getTextoRound();
 
         } 
@@ -207,8 +215,10 @@ public class GamePanel extends JPanel {
 
         }
         else if(tempoContagem > 0){
+            if(tempoContagem == 60)
+                GerenciadorSom.tocarLutem();
 
-            textoRound = "FIGHT!";
+            textoRound = "LUTEM!";
 
         }
         else {

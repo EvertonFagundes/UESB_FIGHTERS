@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import gerenciadores.GerenciadorTelas;
+import gerenciadores.GerenciadorSom;
 
 public class SelecaoCenarioPanel extends JPanel {
 
@@ -149,6 +150,7 @@ public class SelecaoCenarioPanel extends JPanel {
             public void actionPerformed(java.awt.event.ActionEvent e) {
 
                 confirmarSelecao();
+                GerenciadorSom.pararMusica();
             }
         });
 
