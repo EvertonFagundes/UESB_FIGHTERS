@@ -32,7 +32,7 @@ public class Jogador extends Personagem {
             nomeJogador = "everton";
         } else if (id == 1) {
             nomeJogador = "erick";
-        } else {
+        } else if(id == 2){
             nomeJogador = "giulia";
         }
 
