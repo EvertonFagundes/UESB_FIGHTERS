@@ -12,7 +12,7 @@ public class BancoLutadores {
             "everton",
             100,    // vida
             6,      // velocidade
-            10,     // força
+            12,     // força
             18,     // altura do pulo
             8,      // dano soco
             12,     // dano chute
@@ -32,16 +32,16 @@ public class BancoLutadores {
             "ERICK",
             "erick",
             100,
-            5,
-            12,
-            16,
             10,
-            15,
-            4,
-            70,
-            100,
+            9,
+            16,
             7,
-            170,
+            7,
+            4,
+            40,
+            40,
+            7,
+            80,
             270,
             100,
             450,
@@ -55,9 +55,9 @@ public class BancoLutadores {
             100,
             8,
             8,
-            20,
-            7,
-            11,
+            13,
+            6,
+            10,
             2,
             55,
             80,

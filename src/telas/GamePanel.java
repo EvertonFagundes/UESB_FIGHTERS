@@ -47,6 +47,22 @@ public class GamePanel extends JPanel {
 
     private GerenciadorRounds gerenciadorRounds;
 
+    // tempo que o K.O. fica na tela (2 segundos)
+    private int tempoKO = 120;
+    // indica que estamos esperando para iniciar o próximo round
+    private boolean esperandoProximoRound = false;
+
+    private enum EstadoLuta {
+        CONTAGEM,
+        LUTANDO,
+        FINALIZADO
+    }
+
+    private EstadoLuta estadoLuta = EstadoLuta.CONTAGEM;
+    private int contadorRound = 0;
+    private int tempoContagem = 300; // 4 segundos em 60 FPS
+    private String textoRound = "";
+
     public GamePanel(
         GerenciadorTelas janela,
         int player1,
@@ -93,6 +109,7 @@ public class GamePanel extends JPanel {
 
         loop = new GameLoop(this);
         loop.start();
+        textoRound = gerenciadorRounds.getTextoRound();
 
         setFocusable(true);
         requestFocusInWindow();
@@ -115,6 +132,32 @@ public class GamePanel extends JPanel {
 
     public void atualizarJogo() {
 
+        if (esperandoProximoRound) {
+
+            tempoKO--;
+
+            if (tempoKO <= 0) {
+
+                esperandoProximoRound = false;
+
+                gerenciadorRounds.proximoRound();
+
+                resetarRound();
+
+            }
+
+            repaint();
+
+            return;
+        }
+
+         if (estadoLuta == EstadoLuta.CONTAGEM) {
+            atualizarContagem();
+
+            return;
+        }
+
+
         if (jogoEncerrado) return;
 
         limitarNaTela(jogador1);
@@ -136,6 +179,44 @@ public class GamePanel extends JPanel {
 
         atualizarTemporizador();
         verificarFimDeJogo();
+    }
+
+    private void atualizarContagem(){
+
+        tempoContagem--;
+
+
+        if(tempoContagem >= 240){
+
+            textoRound = gerenciadorRounds.getTextoRound();
+
+        } 
+        else if(tempoContagem > 180){
+
+            textoRound = "3";
+
+        }
+        else if(tempoContagem > 120){
+
+            textoRound = "2";
+
+        }
+        else if(tempoContagem > 60){
+
+            textoRound = "1";
+
+        }
+        else if(tempoContagem > 0){
+
+            textoRound = "FIGHT!";
+
+        }
+        else {
+
+            estadoLuta = EstadoLuta.LUTANDO;
+
+        }
+
     }
 
     // aplica dano quando um golpe em andamento encosta no adversário
@@ -255,7 +336,8 @@ public class GamePanel extends JPanel {
                 mensagemFinal =
                     vencedor + " VENCEU O ROUND!";
 
-                resetarRound();
+                esperandoProximoRound = true;
+                tempoKO = 120;
             }
         }
     }
@@ -274,16 +356,14 @@ public class GamePanel extends JPanel {
         tempoRestante = 99;
         contadorSegundo = 0;
 
-        //jogador1.setAtacando(false);
-        //jogador2.setAtacando(false);
-
-        //jogador1.setPulando(false);
-        //jogador2.setPulando(false);
-
         jogoEncerrado = false;
 
         jogador1.resetarEstado();
         jogador2.resetarEstado();
+
+        estadoLuta = EstadoLuta.CONTAGEM;
+        tempoContagem = 300;
+        textoRound = gerenciadorRounds.getTextoRound();
 
     }
 
@@ -332,9 +412,36 @@ public class GamePanel extends JPanel {
         // 4) HUD (vida + tempo)
         desenharHud(g);
 
+        if(estadoLuta == EstadoLuta.CONTAGEM){
+            desenharContagem(g);
+        }
+
         if (jogoEncerrado) {
             desenharFimDeJogo(g);
         }
+    }
+
+    private void desenharContagem(Graphics g){
+
+        g.setColor(Color.WHITE);
+        g.setFont(new Font(
+            "Arial",
+            Font.BOLD,
+            70
+        ));
+
+
+        int largura =
+            g.getFontMetrics()
+            .stringWidth(textoRound);
+
+
+        g.drawString(
+            textoRound,
+            (getWidth()-largura)/2,
+            250
+        );
+
     }
 
     private void desenharHud(Graphics g) {
@@ -356,6 +463,21 @@ public class GamePanel extends JPanel {
             jogador2.getNome(),
             true
         );
+
+        g.setColor(Color.YELLOW);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+
+        String round = gerenciadorRounds.getTextoRound();
+
+        int larguraRound = g.getFontMetrics().stringWidth(round);
+
+        g.drawString(
+            round,
+            (getWidth() - larguraRound) / 2,
+            25
+        );
+
+        desenharVitorias(g);
 
         // temporizador central
         g.setColor(Color.WHITE);
@@ -444,6 +566,56 @@ public class GamePanel extends JPanel {
         }
 
         cenario = new ImageIcon(url).getImage();
+    }
+
+    private void desenharVitorias(Graphics g) {
+
+        int y = 75;
+
+        int diametro = 20;
+        int espacamento = 30;
+
+        // =======================
+        // Jogador 1
+        // =======================
+        for (int i = 0; i < 2; i++) {
+
+            int x = 160 + i * espacamento;
+
+            // Borda
+            g.setColor(Color.WHITE);
+            g.drawOval(x, y, diametro, diametro);
+
+            // Preenchimento
+            if (i < gerenciadorRounds.getVitoriasJogador1()) {
+                g.setColor(Color.YELLOW);
+            } else {
+                g.setColor(Color.DARK_GRAY);
+            }
+
+            g.fillOval(x + 2, y + 2, diametro - 4, diametro - 4);
+        }
+
+        // =======================
+        // Jogador 2
+        // =======================
+        for (int i = 0; i < 2; i++) {
+
+            int x = getWidth() - 220 + i * espacamento;
+
+            // Borda
+            g.setColor(Color.WHITE);
+            g.drawOval(x, y, diametro, diametro);
+
+            // Preenchimento
+            if (i < gerenciadorRounds.getVitoriasJogador2()) {
+                g.setColor(Color.YELLOW);
+            } else {
+                g.setColor(Color.DARK_GRAY);
+            }
+
+            g.fillOval(x + 2, y + 2, diametro - 4, diametro - 4);
+        }
     }
     
 }
