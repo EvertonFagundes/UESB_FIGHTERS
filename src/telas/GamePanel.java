@@ -1,7 +1,10 @@
 package telas;
 
 import entidades.Jogador;
+import entidades.LutadorUESB;
+import gerenciadores.BancoLutadores;
 import gerenciadores.GameLoop;
+import gerenciadores.GerenciadorRounds;
 import gerenciadores.GerenciadorTelas;
 import gerenciadores.InputManager;
 import java.awt.Color;
@@ -19,13 +22,6 @@ public class GamePanel extends JPanel {
 
     private static final int FPS = 60;
 
-    // mesma ordem de índices usada na SelecaoPanel
-    private static final String[] NOMES_PERSONAGENS = {
-        "EVERTON",
-        "ERICK",
-        "GIULIA"
-    };
-
     private static final int LARGURA_BARRA = 400;
     private static final int ALTURA_BARRA = 28;
 
@@ -39,11 +35,6 @@ public class GamePanel extends JPanel {
 
     private GameLoop loop;
 
-    // guardados pra mostrar o nome certo na barra de vida
-    // (os sprites por enquanto são sempre do Everton)
-    private int indicePersonagem1;
-    private int indicePersonagem2;
-
     // cronômetro da luta
     private int tempoRestante = 99;
     private int contadorSegundo = 0;
@@ -53,6 +44,8 @@ public class GamePanel extends JPanel {
     private boolean acabouPorTempo = false;
     private String mensagemFinal = "";
     private InputManager inputManager;
+
+    private GerenciadorRounds gerenciadorRounds;
 
     public GamePanel(
         GerenciadorTelas janela,
@@ -74,10 +67,29 @@ public class GamePanel extends JPanel {
         setFocusable(true);
         requestFocusInWindow();
 
-        jogador1 = new Jogador(player1, 100, 280, true, inputManager, 1);
-        jogador2 = new Jogador(player2, 880, 280, false, inputManager, 2);
+        LutadorUESB lutador1 = BancoLutadores.get(player1);
+        LutadorUESB lutador2 = BancoLutadores.get(player2);
+
+        jogador1 = new Jogador(
+            lutador1,
+            100,
+            280,
+            true,
+            inputManager,
+            1
+        );
+
+        jogador2 = new Jogador(
+            lutador2,
+            880,
+            280,
+            false,
+            inputManager,
+            2
+        );
 
         carregarCenario(arquivoCenario);
+        gerenciadorRounds = new GerenciadorRounds();
 
         loop = new GameLoop(this);
         loop.start();
@@ -157,44 +169,122 @@ public class GamePanel extends JPanel {
 
     private void verificarFimDeJogo() {
 
+        String vencedor = null;
+
+        // =========================
+        // MORTE DO JOGADOR
+        // =========================
         if (!jogador1.estaVivo() || !jogador2.estaVivo()) {
 
-            jogoEncerrado = true;
-            acabouPorTempo = false;
-
             if (!jogador1.estaVivo() && !jogador2.estaVivo()) {
-                mensagemFinal = "EMPATE!";
-            } else if (!jogador1.estaVivo()) {
-                mensagemFinal = nomePersonagem(indicePersonagem2) + " VENCEU!";
-            } else {
-                mensagemFinal = nomePersonagem(indicePersonagem1) + " VENCEU!";
-            }
 
-            return;
+                mensagemFinal = "EMPATE!";
+                jogoEncerrado = true;
+                return;
+
+            } else if (!jogador1.estaVivo()) {
+
+                vencedor = jogador2.getNome();
+
+            } else {
+
+                vencedor = jogador1.getNome();
+
+            }
         }
 
-        if (tempoRestante <= 0) {
+        // =========================
+        // TEMPO ACABOU
+        // =========================
+        else if (tempoRestante <= 0) {
 
-            jogoEncerrado = true;
             acabouPorTempo = true;
 
+
             if (jogador1.getVida() > jogador2.getVida()) {
-                mensagemFinal = nomePersonagem(indicePersonagem1) + " VENCEU!";
+
+                vencedor = jogador1.getNome();
+
             } else if (jogador2.getVida() > jogador1.getVida()) {
-                mensagemFinal = nomePersonagem(indicePersonagem2) + " VENCEU!";
+
+                vencedor = jogador2.getNome();
+
             } else {
+
                 mensagemFinal = "EMPATE!";
+                jogoEncerrado = true;
+                return;
+
+            }
+
+        }
+
+        // =========================
+        // FINALIZA ROUND
+        // =========================
+       if (vencedor != null) {
+
+            // registra quem venceu o round
+            if (vencedor.equals(jogador1.getNome())) {
+
+                gerenciadorRounds.jogador1Venceu();
+
+            } else {
+
+                gerenciadorRounds.jogador2Venceu();
+            }
+
+            // verifica se alguém ganhou a luta
+            if (gerenciadorRounds.lutaTerminou()) {
+
+                jogoEncerrado = true;
+
+                if (gerenciadorRounds.vencedorFinal() == 1) {
+
+                    mensagemFinal =
+                        jogador1.getNome() + " VENCEU A LUTA!";
+
+                } else {
+
+                    mensagemFinal =
+                        jogador2.getNome() + " VENCEU A LUTA!";
+                }
+
+            } else {
+
+                mensagemFinal =
+                    vencedor + " VENCEU O ROUND!";
+
+                resetarRound();
             }
         }
     }
 
-    private String nomePersonagem(int indice) {
+    private void resetarRound() {
 
-        if (indice < 0 || indice >= NOMES_PERSONAGENS.length) {
-            return "JOGADOR";
-        }
+        jogador1.setVida(100);
+        jogador2.setVida(100);
 
-        return NOMES_PERSONAGENS[indice];
+        jogador1.setX(100);
+        jogador2.setX(880);
+
+        jogador1.setY(280);
+        jogador2.setY(280);
+
+        tempoRestante = 99;
+        contadorSegundo = 0;
+
+        //jogador1.setAtacando(false);
+        //jogador2.setAtacando(false);
+
+        //jogador1.setPulando(false);
+        //jogador2.setPulando(false);
+
+        jogoEncerrado = false;
+
+        jogador1.resetarEstado();
+        jogador2.resetarEstado();
+
     }
 
     // não deixa o jogador sair da tela
@@ -254,7 +344,7 @@ public class GamePanel extends JPanel {
             jogador1,
             40,
             30,
-            nomePersonagem(indicePersonagem1),
+            jogador1.getNome(),
             false
         );
 
@@ -263,7 +353,7 @@ public class GamePanel extends JPanel {
             jogador2,
             getWidth() - 40 - LARGURA_BARRA,
             30,
-            nomePersonagem(indicePersonagem2),
+            jogador2.getNome(),
             true
         );
 

@@ -8,13 +8,15 @@ import java.net.URL;
 import javax.swing.ImageIcon;
 
 public class Jogador extends Personagem {
+    
+    private LutadorUESB dados;
 
     private int playerId; // 1 ou 2
 
-    public Jogador(int id, int x, int y, boolean viradoDireita, InputManager input, int playerId) {
+    public Jogador(LutadorUESB dados, int x, int y, boolean viradoDireita, InputManager input, int playerId) {
 
-        super(x, y, 300, 400, 100, 6, 10);
-
+        super(dados, x, y, dados.getLarguraSprite(), dados.getAlturaSprite());
+        this.dados = dados;
         this.input = input;
         this.viradoDireita = viradoDireita;
         this.playerId = playerId;
@@ -26,45 +28,35 @@ public class Jogador extends Personagem {
         chute = new Image[4]; // garante que não fica null
         pulo = new Image[5];
 
-        String nomeJogador = "";
-
-        if (id == 0) {
-            nomeJogador = "everton";
-        } else if (id == 1) {
-            nomeJogador = "erick";
-        } else if(id == 2){
-            nomeJogador = "giulia";
-        }
-
         // IDLE
-        parado[0] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/idle_1.png");
-        parado[1] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/idle_2.png");
-        parado[2] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/idle_3.png");
-        parado[3] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/idle_4.png");
+        parado[0] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/idle_1.png");
+        parado[1] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/idle_2.png");
+        parado[2] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/idle_3.png");
+        parado[3] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/idle_4.png");
 
         // SOCO
-        soco[0] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/punch_1.png");
-        soco[1] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/punch_2.png");
-        soco[2] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/punch_3.png");
-        soco[3] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/punch_4.png");
-        soco[4] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/punch_5.png");
+        soco[0] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/punch_1.png");
+        soco[1] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/punch_2.png");
+        soco[2] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/punch_3.png");
+        soco[3] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/punch_4.png");
+        soco[4] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/punch_5.png");
 
         // ANDAR
-        andar[0] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/walk_1.png");
-        andar[1] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/walk_2.png");
-        andar[2] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/walk_3.png");
-        andar[3] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/walk_4.png");
-        andar[4] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/walk_5.png");
-        andar[5] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/walk_6.png");
-        andar[6] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/walk_7.png");
-        andar[7] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/walk_8.png");
+        andar[0] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/walk_1.png");
+        andar[1] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/walk_2.png");
+        andar[2] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/walk_3.png");
+        andar[3] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/walk_4.png");
+        andar[4] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/walk_5.png");
+        andar[5] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/walk_6.png");
+        andar[6] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/walk_7.png");
+        andar[7] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/walk_8.png");
 
         //PULO
-        pulo[0] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/jump_1.png");
-        pulo[1] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/jump_2.png");
-        pulo[2] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/jump_3.png");
-        pulo[3] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/jump_4.png");
-        pulo[4] = carregarImagem("/assets/personagens/" + nomeJogador + "/sprites/jump_5.png");
+        pulo[0] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/jump_1.png");
+        pulo[1] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/jump_2.png");
+        pulo[2] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/jump_3.png");
+        pulo[3] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/jump_4.png");
+        pulo[4] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/jump_5.png");
 
 
     }
@@ -78,6 +70,18 @@ public class Jogador extends Personagem {
         }
 
         return new ImageIcon(url).getImage();
+    }
+
+    public String getNome() {
+        return dados.getNome();
+    }
+
+    public int getIdLutador() {
+        return dados.getId();
+    }
+
+    public LutadorUESB getDados() {
+        return dados;
     }
 
     // =========================
@@ -211,14 +215,14 @@ public class Jogador extends Personagem {
 
         if (viradoDireita) {
 
-            g.drawImage(sprite, x, y, largura, altura, null);
+            g.drawImage(sprite, x, y + ajusteY, largura, altura, null);
 
         } else {
 
             g.drawImage(
                     sprite,
                     x + largura,
-                    y,
+                    y + ajusteY,
                     -largura,
                     altura,
                     null

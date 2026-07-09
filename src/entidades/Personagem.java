@@ -1,10 +1,10 @@
 package entidades;
 
 import enums.Estado;
+import gerenciadores.InputManager;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
-import gerenciadores.InputManager;
 
 public abstract class Personagem {
     
@@ -53,6 +53,12 @@ public abstract class Personagem {
     // impede que o mesmo golpe acerte várias vezes seguidas
     protected boolean golpeAcertou;
 
+    protected int larguraHitbox;
+
+    protected int alturaHitbox;
+
+    protected int ajusteY;
+
     protected static final int GRAVIDADE = 1;
     protected static final int FORCA_PULO = -18;
     protected static final int DURACAO_ATAQUE = 15;
@@ -60,16 +66,19 @@ public abstract class Personagem {
 
     protected InputManager input;
 
-    public Personagem(int x, int y, int largura, int altura, int vida, int velocidade, int forca) {
+    public Personagem(LutadorUESB dados, int x, int y, int largura, int altura) {
         this.x = x;
         this.y = y;
 
         this.largura = largura;
         this.altura = altura;
 
-        this.vida = vida;
-        this.velocidade = velocidade;
-        this.forca = forca;
+        this.vida = dados.getVida();
+        this.velocidade = dados.getVelocidade();
+        this.forca = dados.getForca();
+        this.larguraHitbox = dados.getLarguraHitbox();
+        this.alturaHitbox = dados.getAlturaHitbox();
+        this.ajusteY = dados.getAjusteY();
 
 		this.frameAtual = 0;
 
@@ -88,12 +97,13 @@ public abstract class Personagem {
         this.golpeAcertou = true;
     }
 
-    // Inicia o pulo (só funciona se o personagem já estiver no chão)
     public void pular() {
 
-        if (!pulando) {
+        if (!pulando && !atacando) {
+
             pulando = true;
             velocidadeY = FORCA_PULO;
+
             mudarEstado(Estado.PULANDO);
         }
     }
@@ -110,7 +120,9 @@ public abstract class Personagem {
                 y = chaoY;
                 velocidadeY = 0;
                 pulando = false;
-                mudarEstado(Estado.PARADO);
+                if(!atacando){
+                    mudarEstado(Estado.PARADO);
+                }
             }
         }
     }
@@ -167,32 +179,14 @@ public abstract class Personagem {
     // (a foto recortada tem bastante espaço vazio ao redor)
     public Hitbox getHitbox() {
 
-        int insetX = (int) (largura * 0.2);
-        int insetYTopo = (int) (altura * 0.2);
-
-        int hitboxLargura = (int) (largura * 0.6);
-        int hitboxAltura = (int) (altura * 0.75);
-
         return new Hitbox(
-            x + insetX,
-            y + insetYTopo,
-            hitboxLargura,
-            hitboxAltura
+            x + (largura - larguraHitbox) / 2,
+            y + (altura - alturaHitbox),
+            larguraHitbox,
+            alturaHitbox
         );
     }
 
-    // Conta quanto falta pro golpe atual terminar
-    /*protected void atualizarAtaque() {
-
-        if (atacando) {
-
-            temporizadorAtaque--;
-
-            if (temporizadorAtaque <= 0) {
-                atacando = false;
-            }
-        }
-    }*/
     protected void atualizarAtaque() {
 
         // A animação controla o ataque.
@@ -310,6 +304,23 @@ public abstract class Personagem {
 
         frameAtual = 0;
         contadorAnimacao = 0;
+    }
+
+    public void resetarEstado(){
+
+        estado = Estado.PARADO;
+
+        frameAtual = 0;
+        contadorAnimacao = 0;
+
+        atacando = false;
+        pulando = false;
+
+        velocidadeY = 0;
+
+        temporizadorAtaque = 0;
+        danoGolpeAtual = 0;
+        golpeAcertou = false;
     }
 
     public abstract void atualizar();
