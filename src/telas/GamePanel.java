@@ -106,7 +106,6 @@ public class GamePanel extends JPanel {
         );
 
         carregarCenario(arquivoCenario);
-        //GerenciadorSom.iniciarMusicaLuta();
         gerenciadorRounds = new GerenciadorRounds();
 
         loop = new GameLoop(this);
@@ -217,6 +216,8 @@ public class GamePanel extends JPanel {
         else if(tempoContagem > 0){
             if(tempoContagem == 60)
                 GerenciadorSom.tocarLutem();
+                if(gerenciadorRounds.getRoundAtual() == 1)
+                    GerenciadorSom.iniciarMusicaLuta();
 
             textoRound = "LUTEM!";
 
@@ -241,6 +242,7 @@ public class GamePanel extends JPanel {
         if (atacante.getHitbox().colideCom(alvo.getHitbox())) {
             alvo.receberDano(atacante.getDanoGolpeAtual());
             atacante.setGolpeAcertou(true);
+            GerenciadorSom.tocarSoco();
         }
     }
 
@@ -302,8 +304,8 @@ public class GamePanel extends JPanel {
 
             } else {
 
-                mensagemFinal = "EMPATE!";
-                jogoEncerrado = true;
+                esperandoProximoRound = true;
+                tempoKO = 120;
                 return;
 
             }

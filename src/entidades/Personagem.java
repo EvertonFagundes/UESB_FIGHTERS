@@ -1,6 +1,7 @@
 package entidades;
 
 import enums.Estado;
+import gerenciadores.GerenciadorSom;
 import gerenciadores.InputManager;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -139,10 +140,12 @@ public abstract class Personagem {
         if(tipoGolpe == 1){
 
             mudarEstado(Estado.SOCO);
+            GerenciadorSom.tocarWhoosh();
 
         }else{
 
             mudarEstado(Estado.CHUTE);
+            GerenciadorSom.tocarWhoosh();
 
         }
 

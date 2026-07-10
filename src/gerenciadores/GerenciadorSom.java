@@ -32,10 +32,16 @@ public class GerenciadorSom {
             "/assets/sons/jogadorDoisVenceu.wav";
 
     public static final String MUSICA_LUTA =
-            "/assets/sons/UESBFIGHTER_Campus Kombat.wav";
+            "/assets/sons/UESBFIGHTER_Campus-Kombat.wav";
 
     public static final String MUSICA_MENU =
             "/assets/sons/menu.wav";
+
+    public static final String SOCO =
+            "/assets/sons/soco.wav";
+
+    public static final String WHOOSH =
+            "/assets/sons/whoosh.wav";
 
     public static void tocarMusica(String caminho) {
 
@@ -124,5 +130,13 @@ public class GerenciadorSom {
 
     public static void iniciarMusicaMenu() {
         tocarMusica(MUSICA_MENU);
+    }
+
+    public static void tocarSoco(){
+        tocarEfeito(SOCO);
+    }
+
+    public static void tocarWhoosh(){
+        tocarEfeito(WHOOSH);
     }
 }
