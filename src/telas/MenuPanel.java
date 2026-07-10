@@ -1,17 +1,13 @@
 package telas;
 
-import java.awt.Color;
+import gerenciadores.GerenciadorSom;
+import gerenciadores.GerenciadorTelas;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
-
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-
-import gerenciadores.GerenciadorTelas;
-import gerenciadores.GerenciadorSom;
 
 public class MenuPanel extends JPanel {
 
@@ -35,7 +31,7 @@ public class MenuPanel extends JPanel {
 
         JButton btnJogar = new JButton("");
 
-        btnJogar.setBounds(510, 520, 250, 60);
+        btnJogar.setBounds(510, 565, 250, 60);
 
         btnJogar.setFont(new Font("Arial", Font.BOLD, 24));
 
