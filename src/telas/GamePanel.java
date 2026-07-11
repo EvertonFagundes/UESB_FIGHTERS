@@ -240,9 +240,25 @@ public class GamePanel extends JPanel {
         }
 
         if (atacante.getHitbox().colideCom(alvo.getHitbox())) {
-            alvo.receberDano(atacante.getDanoGolpeAtual());
+
+            if (alvo.isBloqueando()) {
+
+                // Recebe apenas parte do dano
+                alvo.receberDano(atacante.getDanoGolpeAtual() / 4);
+
+                // Som de bloqueio
+                //GerenciadorSom.tocarBloqueio();
+
+            } else {
+
+                // Recebe dano normal
+                alvo.receberDano(atacante.getDanoGolpeAtual());
+
+                // Som do impacto
+                GerenciadorSom.tocarSoco();
+            }
+
             atacante.setGolpeAcertou(true);
-            GerenciadorSom.tocarSoco();
         }
     }
 
@@ -321,10 +337,13 @@ public class GamePanel extends JPanel {
             if (vencedor.equals(jogador1.getNome())) {
 
                 gerenciadorRounds.jogador1Venceu();
+                GerenciadorSom.tocarJogador1Venceu();
 
             } else {
 
                 gerenciadorRounds.jogador2Venceu();
+                GerenciadorSom.tocarJogador2Venceu();
+
             }
 
             // verifica se alguém ganhou a luta

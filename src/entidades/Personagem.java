@@ -31,6 +31,9 @@ public abstract class Personagem {
     protected Image[] chute;
     protected Image[] pulo;
     protected Image[] dano;
+    protected Image[] bloqueio;
+    protected Image[] vitoria;
+    protected Image[] derrota;
 
     // frame atual
     protected int frameAtual;
@@ -54,6 +57,8 @@ public abstract class Personagem {
     // impede que o mesmo golpe acerte várias vezes seguidas
     protected boolean golpeAcertou;
 
+    protected boolean bloqueando;
+
     protected int larguraHitbox;
 
     protected int alturaHitbox;
@@ -64,6 +69,10 @@ public abstract class Personagem {
     protected static final int FORCA_PULO = -18;
     protected static final int DURACAO_ATAQUE = 15;
     protected static final int VELOCIDADE_ANIMACAO = 8;
+
+    protected boolean recebendoDano;
+    protected int tempoDano;
+    protected static final int DURACAO_DANO = 18;
 
     protected InputManager input;
 
@@ -263,6 +272,29 @@ public abstract class Personagem {
                     }
 
                     break;
+
+                case BLOQUEANDO:
+
+                    frameAtual++;
+
+                    if(frameAtual >= bloqueio.length){
+
+                        frameAtual = 0;
+
+                    }
+                    break;
+
+                case DANO:
+
+                    frameAtual++;
+
+                    if(frameAtual >= dano.length){
+
+                        frameAtual = dano.length - 1;
+
+                    }
+
+                    break;
             }
 
     }
@@ -326,6 +358,26 @@ public abstract class Personagem {
         golpeAcertou = false;
     }
 
+    public void bloquear() {
+
+        if (atacando || pulando)
+            return;
+
+        bloqueando = true;
+
+        mudarEstado(Estado.BLOQUEANDO);
+    }
+
+    public void pararBloqueio() {
+
+        if (!bloqueando)
+            return;
+
+        bloqueando = false;
+
+        mudarEstado(Estado.PARADO);
+    }
+
     public abstract void atualizar();
 
     public abstract void desenhar(Graphics g);
@@ -339,10 +391,41 @@ public abstract class Personagem {
 
     // Tomar dano
     public void receberDano(int dano) {
+
+        if(recebendoDano)
+            return;
+
+        if(viradoDireita)
+            x -= 12;
+        else
+            x += 12;
+
         vida -= dano;
 
-        if (vida < 0) {
+        if(vida < 0)
             vida = 0;
+
+        recebendoDano = true;
+        tempoDano = DURACAO_DANO;
+
+        atacando = false;
+        bloqueando = false;
+
+        mudarEstado(Estado.DANO);
+    }
+
+    protected void atualizarDano(){
+
+        if(!recebendoDano)
+            return;
+
+        tempoDano--;
+
+        if(tempoDano <= 0){
+
+            recebendoDano = false;
+            mudarEstado(Estado.PARADO);
+
         }
     }
 
@@ -472,6 +555,34 @@ public abstract class Personagem {
 	public void setDano(Image[] dano) {
 		this.dano = dano;
 	}
+
+    public boolean isBloqueando() {
+        return bloqueando;
+    }
+
+    public Image[] getBloqueio() {
+        return bloqueio;
+    }
+
+    public void setBloqueio(Image[] bloqueio){
+        this.bloqueio = bloqueio;
+    }
+
+    public Image[] getVitoria() {
+        return vitoria;
+    }
+    
+    public void setVitoria(Image[] vitoria){
+        this.vitoria = vitoria;
+    }
+
+    public Image[] getDerrota() {
+        return derrota;
+    }
+    
+    public void setDerrota(Image[] derrota){
+        this.derrota = derrota;
+    }
 
 	public boolean isViradoDireita() {
 		return viradoDireita;

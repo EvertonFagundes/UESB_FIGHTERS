@@ -26,8 +26,12 @@ public class Jogador extends Personagem {
         parado = new Image[4];
         soco = new Image[5];
         andar = new Image[8];
-        chute = new Image[4]; // garante que não fica null
+        chute = new Image[5]; // garante que não fica null
         pulo = new Image[5];
+        dano = new Image[3];
+        bloqueio = new Image[3];
+        vitoria = new Image[5];
+        derrota = new Image[3];
 
         // IDLE
         parado[0] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/idle_1.png");
@@ -52,6 +56,13 @@ public class Jogador extends Personagem {
         andar[6] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/walk_7.png");
         andar[7] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/walk_8.png");
 
+        //CHUTE
+        chute[0] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/kick_1.png");
+        chute[1] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/kick_2.png");
+        chute[2] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/kick_3.png");
+        chute[3] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/kick_4.png");
+        chute[4] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/kick_5.png");
+
         //PULO
         pulo[0] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/jump_1.png");
         pulo[1] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/jump_2.png");
@@ -59,6 +70,27 @@ public class Jogador extends Personagem {
         pulo[3] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/jump_4.png");
         pulo[4] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/jump_5.png");
 
+        //DANO
+        dano[0] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/hurt_1.png");
+        dano[1] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/hurt_2.png");
+        dano[2] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/hurt_3.png");
+
+        //BLOQUEIO
+        bloqueio[0] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/block_1.png");
+        bloqueio[1] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/block_2.png");
+        bloqueio[2] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/block_3.png");
+
+        //VITORIA
+        vitoria[0] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/victory_1.png");
+        vitoria[1] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/victory_2.png");
+        vitoria[2] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/victory_3.png");
+        vitoria[3] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/victory_4.png");
+        vitoria[4] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/victory_5.png");
+
+        //DERROTA
+        derrota[0] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/defeat_1.png");
+        derrota[1] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/defeat_2.png");
+        derrota[2] = carregarImagem("/assets/personagens/" + dados.getPastaSprites() + "/sprites/defeat_3.png");
 
     }
 
@@ -93,6 +125,14 @@ public class Jogador extends Personagem {
 
         boolean movendo = false;
 
+        if(recebendoDano){
+
+            atualizarFisica();
+            atualizarDano();
+            atualizarAnimacao();
+            return;
+        }
+
         // =========================
         // PLAYER 1
         // =========================
@@ -121,6 +161,12 @@ public class Jogador extends Personagem {
 
             if (input.chuteP1 && !atacando) {
                 atacar(2);
+            }
+
+            if(input.bloqueioP1){
+                bloquear();
+            }else{
+                pararBloqueio();
             }
         }
 
@@ -152,6 +198,12 @@ public class Jogador extends Personagem {
             if (input.chuteP2 && !atacando) {
                 atacar(2);
             }
+
+            if(input.bloqueioP2){
+                bloquear();
+            }else{
+                pararBloqueio();
+            }
         }
 
         // =========================
@@ -171,6 +223,7 @@ public class Jogador extends Personagem {
         atualizarFisica();
         atualizarAtaque();
         atualizarAnimacao();
+        atualizarDano();
     }
 
     // =========================
@@ -207,6 +260,14 @@ public class Jogador extends Personagem {
                 }
                 break;
 
+            case BLOQUEANDO:
+                sprite = bloqueio[frameAtual];
+                break;
+
+            case DANO:
+                sprite = dano[frameAtual];
+                break;
+
             default:
                 sprite = parado[0];
         }
@@ -236,6 +297,8 @@ public class Jogador extends Personagem {
     // =========================
     @Override
     public void atacar(int tipoGolpe) {
+        if(bloqueando)
+            return;
         iniciarAtaque(tipoGolpe);
     }
 
@@ -244,12 +307,16 @@ public class Jogador extends Personagem {
     // =========================
     @Override
     public void moverDireita() {
+        if(bloqueando)
+            return;
 
         super.moverDireita();
     }
 
     @Override
     public void moverEsquerda() {
+        if(bloqueando)
+            return;
 
         super.moverEsquerda();
     }
