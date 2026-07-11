@@ -4,8 +4,12 @@ public enum Estado {
 
     PARADO,
     ANDANDO,
+    PULANDO,
     SOCO,
     CHUTE,
-    PULANDO
+    BLOQUEANDO,
+    DANO,
+    VITORIA,
+    DERROTA
 
 }
