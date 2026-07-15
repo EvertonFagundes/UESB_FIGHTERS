@@ -67,6 +67,27 @@ public class BancoLutadores {
             300,
             400,
             30
+        ),
+
+         new LutadorUESB(
+            3,
+            "JOAO",
+            "joao",
+            100,
+            12,
+            6,
+            8,
+            5,
+            7,
+            2,
+            30,
+            500,
+            10,
+            160,
+            250,
+            400,
+            400,
+            30
         )
     };
 
