@@ -6,13 +6,15 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.net.URL;
 import javax.swing.ImageIcon;
-import gerenciadores.GerenciadorSom;
+import java.awt.Color;
 
 public class Jogador extends Personagem {
     
     private LutadorUESB dados;
 
     private int playerId; // 1 ou 2
+
+    private boolean especialUsado = false;
 
     public Jogador(LutadorUESB dados, int x, int y, boolean viradoDireita, InputManager input, int playerId) {
 
@@ -140,13 +142,11 @@ public class Jogador extends Personagem {
 
             if (input.esquerdaP1) {
                 x -= velocidade;
-                viradoDireita = false;
                 movendo = true;
             }
 
             if (input.direitaP1) {
                 x += velocidade;
-                viradoDireita = true;
                 movendo = true;
             }
 
@@ -168,6 +168,18 @@ public class Jogador extends Personagem {
             }else{
                 pararBloqueio();
             }
+            if(input.especialP1 && !especialUsado){
+
+                usarEspecial();
+                especialUsado = true;
+
+            }
+
+            if(!input.especialP1){
+
+                especialUsado = false;
+
+            }
         }
 
         // =========================
@@ -177,13 +189,11 @@ public class Jogador extends Personagem {
 
             if (input.esquerdaP2) {
                 x -= velocidade;
-                viradoDireita = false;
                 movendo = true;
             }
 
             if (input.direitaP2) {
                 x += velocidade;
-                viradoDireita = true;
                 movendo = true;
             }
 
@@ -203,6 +213,18 @@ public class Jogador extends Personagem {
                 bloquear();
             }else{
                 pararBloqueio();
+            }
+            if(input.especialP2 && !especialUsado){
+
+                usarEspecial();
+                especialUsado = true;
+
+            }
+
+            if(!input.especialP2){
+
+                especialUsado = false;
+
             }
         }
 
@@ -224,6 +246,28 @@ public class Jogador extends Personagem {
         atualizarAtaque();
         atualizarAnimacao();
         atualizarDano();
+        atualizarEspecial();
+        if(especialAtivo && tempoEspecial <= 0){
+            desativarEspecial();
+        }
+    }
+
+    private void desativarEspecial(){
+
+        especialAtivo = false;
+
+        if(getNome().equals("ERICK")){
+
+            largura = dados.getLarguraSprite();
+            altura = dados.getAlturaSprite();
+            velocidade = dados.getVelocidade();
+            forca = dados.getForca();
+            larguraHitbox = dados.getLarguraHitbox();
+            alturaHitbox = dados.getAlturaHitbox();
+            ajusteY = dados.getAjusteY();
+
+        }
+
     }
 
     // =========================
@@ -275,6 +319,23 @@ public class Jogador extends Personagem {
         if (sprite == null)
             return;
 
+        if (especialAtivo) {
+
+            int alpha = (int)(70 + 50 *
+                    Math.sin(System.currentTimeMillis() / 80.0));
+
+            g.setColor(new Color(255, 255, 255, alpha));
+
+            g.fillRoundRect(
+                    x - 6,
+                    y + ajusteY - 6,
+                    largura + 12,
+                    altura + 12,
+                    18,
+                    18
+            );
+        }
+
         if (viradoDireita) {
 
             g.drawImage(sprite, x, y + ajusteY, largura, altura, null);
@@ -290,6 +351,57 @@ public class Jogador extends Personagem {
                     null
             );
         }
+    }
+
+    @Override
+    public void usarEspecial(){
+
+        if(getEnergiaEspecial() < 100)
+            return;
+
+
+        consumirEnergiaEspecial();
+
+
+        if(getNome().equals("EVERTON")){
+
+            ativarSuperForca();
+
+        }else if(getNome().equals("ERICK")){
+
+            ativarGigante();
+
+        }
+
+    }
+
+    private void ativarSuperForca(){
+
+        especialAtivo = true;
+
+        tempoEspecial = 300; // 5 segundos
+
+        System.out.println("SUPER FORÇA ATIVADA!");
+
+    }
+
+    private void ativarGigante(){
+
+        especialAtivo = true;
+
+        tempoEspecial = DURACAO_ESPECIAL;
+
+        largura = (int)(largura * 1.8);
+        altura = (int)(altura * 1.8);
+        alturaHitbox = (int)(alturaHitbox * 1.8);
+        larguraHitbox = (int)(larguraHitbox * 1.8);
+
+        forca += 8;
+
+        velocidade -= 2;
+
+        ajusteY = -350;
+
     }
 
     // =========================

@@ -1,5 +1,6 @@
 package telas;
 
+import entidades.Hitbox;
 import entidades.Jogador;
 import entidades.LutadorUESB;
 import gerenciadores.BancoLutadores;
@@ -18,6 +19,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import gerenciadores.GerenciadorSom;
+import entidades.Hitbox;
 
 public class GamePanel extends JPanel {
 
@@ -164,7 +166,10 @@ public class GamePanel extends JPanel {
         limitarNaTela(jogador1);
         limitarNaTela(jogador2);
 
-        if (jogador1.getX() < jogador2.getX()) {
+        int centro1 = jogador1.getHitbox().getCentroX();
+        int centro2 = jogador2.getHitbox().getCentroX();
+
+        if (centro1 < centro2) {
             jogador1.setViradoDireita(true);
             jogador2.setViradoDireita(false);
         } else {
@@ -246,6 +251,9 @@ public class GamePanel extends JPanel {
                 // Recebe apenas parte do dano
                 alvo.receberDano(atacante.getDanoGolpeAtual() / 4);
 
+                atacante.adicionarEnergiaEspecial(3);
+                alvo.adicionarEnergiaEspecial(2);
+
                 // Som de bloqueio
                 //GerenciadorSom.tocarBloqueio();
 
@@ -253,6 +261,8 @@ public class GamePanel extends JPanel {
 
                 // Recebe dano normal
                 alvo.receberDano(atacante.getDanoGolpeAtual());
+                atacante.adicionarEnergiaEspecial(8);
+                alvo.adicionarEnergiaEspecial(4);
 
                 // Som do impacto
                 GerenciadorSom.tocarSoco();
@@ -486,12 +496,28 @@ public class GamePanel extends JPanel {
             false
         );
 
+        desenharBarraEspecial(
+            g,
+            jogador1,
+            40,
+            65,
+            false
+        );
+
         desenharBarraDeVida(
             g,
             jogador2,
             getWidth() - 40 - LARGURA_BARRA,
             30,
             jogador2.getNome(),
+            true
+        );
+
+        desenharBarraEspecial(
+            g,
+            jogador2,
+            getWidth() - 40 - LARGURA_BARRA,
+            65,
             true
         );
 
@@ -567,6 +593,71 @@ public class GamePanel extends JPanel {
         g.drawRect(x, y, LARGURA_BARRA, ALTURA_BARRA);
     }
 
+    private void desenharBarraEspecial(
+        Graphics g,
+        Jogador jogador,
+        int x,
+        int y,
+        boolean cresceDaDireita) {
+
+        int largura = LARGURA_BARRA;
+        int altura = 12;
+
+        // fundo
+        g.setColor(Color.DARK_GRAY);
+        g.fillRect(x, y, largura, altura);
+
+        double percentual = jogador.getEnergiaEspecial() / 100.0;
+
+        if(percentual < 0)
+            percentual = 0;
+
+        int larguraAtual = (int)(largura * percentual);
+        if (jogador.isEspecialAtivo()) {
+
+            if ((System.currentTimeMillis() / 150) % 2 == 0) {
+                g.setColor(new Color(255,215,0)); // dourado
+            } else {
+                g.setColor(Color.YELLOW);
+            }
+
+        } else if (jogador.getEnergiaEspecial() >= 100) {
+
+            if ((System.currentTimeMillis() / 200) % 2 == 0) {
+                g.setColor(Color.YELLOW);
+            } else {
+                g.setColor(Color.ORANGE);
+            }
+
+        } else {
+
+            g.setColor(Color.CYAN);
+
+        }
+        if(cresceDaDireita){
+
+            g.fillRect(
+                x + largura - larguraAtual,
+                y,
+                larguraAtual,
+                altura
+            );
+
+        }else{
+
+            g.fillRect(
+                x,
+                y,
+                larguraAtual,
+                altura
+            );
+
+        }
+
+        g.setColor(Color.WHITE);
+        g.drawRect(x, y, largura, altura);
+    }
+
     private void desenharFimDeJogo(Graphics g) {
 
         g.setColor(new Color(0, 0, 0, 170));
@@ -601,7 +692,7 @@ public class GamePanel extends JPanel {
 
     private void desenharVitorias(Graphics g) {
 
-        int y = 75;
+        int y = 85;
 
         int diametro = 20;
         int espacamento = 30;

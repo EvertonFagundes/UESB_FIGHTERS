@@ -9,11 +9,14 @@ public class InputManager implements KeyListener {
     public boolean esquerdaP1, direitaP1, puloP1;
     public boolean socoP1, chuteP1;
     public boolean bloqueioP1;
+    public boolean especialP1;
 
     // Jogador 2
     public boolean esquerdaP2, direitaP2, puloP2;
     public boolean socoP2, chuteP2;
     public boolean bloqueioP2;
+    public boolean especialP2;
+
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -21,7 +24,7 @@ public class InputManager implements KeyListener {
         switch (e.getKeyCode()) {
 
             // ======================
-            // PLAYER 1 (WASD + JKl)
+            // PLAYER 1 (WASD + JKlI)
             // ======================
             case KeyEvent.VK_A -> esquerdaP1 = true;
             case KeyEvent.VK_D -> direitaP1 = true;
@@ -29,10 +32,10 @@ public class InputManager implements KeyListener {
             case KeyEvent.VK_J -> socoP1 = true;
             case KeyEvent.VK_K -> chuteP1 = true;
             case KeyEvent.VK_L -> bloqueioP1 = true;
-
+            case KeyEvent.VK_I -> especialP1 = true;
 
             // ======================
-            // PLAYER 2 (SETAS + 1/2)
+            // PLAYER 2 (SETAS + 1/2/3/5)
             // ======================
             case KeyEvent.VK_LEFT -> esquerdaP2 = true;
             case KeyEvent.VK_RIGHT -> direitaP2 = true;
@@ -40,6 +43,7 @@ public class InputManager implements KeyListener {
             case KeyEvent.VK_NUMPAD1, KeyEvent.VK_1 -> socoP2 = true;
             case KeyEvent.VK_NUMPAD2, KeyEvent.VK_2 -> chuteP2 = true;
             case KeyEvent.VK_NUMPAD3, KeyEvent.VK_3 -> bloqueioP2 = true;
+            case KeyEvent.VK_NUMPAD5 -> especialP2 = true;
         }
     }
 
@@ -55,6 +59,7 @@ public class InputManager implements KeyListener {
             case KeyEvent.VK_J -> socoP1 = false;
             case KeyEvent.VK_K -> chuteP1 = false;
             case KeyEvent.VK_L -> bloqueioP1 = false;
+            case KeyEvent.VK_I -> especialP1 = false;
 
             // PLAYER 2
             case KeyEvent.VK_LEFT -> esquerdaP2 = false;
@@ -63,6 +68,7 @@ public class InputManager implements KeyListener {
             case KeyEvent.VK_NUMPAD1, KeyEvent.VK_1 -> socoP2 = false;
             case KeyEvent.VK_NUMPAD2, KeyEvent.VK_2 -> chuteP2 = false;
             case KeyEvent.VK_NUMPAD3 -> bloqueioP2 = false;
+            case KeyEvent.VK_NUMPAD5 -> especialP2 = false;
         }
     }
 
