@@ -1,11 +1,12 @@
 package telas;
 
-import entidades.Hitbox;
+import entidades.Biscoito;
 import entidades.Jogador;
 import entidades.LutadorUESB;
 import gerenciadores.BancoLutadores;
 import gerenciadores.GameLoop;
 import gerenciadores.GerenciadorRounds;
+import gerenciadores.GerenciadorSom;
 import gerenciadores.GerenciadorTelas;
 import gerenciadores.InputManager;
 import java.awt.Color;
@@ -13,13 +14,12 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import gerenciadores.GerenciadorSom;
-import entidades.Hitbox;
 
 public class GamePanel extends JPanel {
 
@@ -65,6 +65,7 @@ public class GamePanel extends JPanel {
     private int contadorRound = 0;
     private int tempoContagem = 300; // 4 segundos em 60 FPS
     private String textoRound = "";
+    private ArrayList<Biscoito> biscoitos = new ArrayList<>();
 
     public GamePanel(
         GerenciadorTelas janela,
@@ -89,13 +90,16 @@ public class GamePanel extends JPanel {
         LutadorUESB lutador1 = BancoLutadores.get(player1);
         LutadorUESB lutador2 = BancoLutadores.get(player2);
 
+        biscoitos = new ArrayList<>();
+
         jogador1 = new Jogador(
             lutador1,
             100,
             280,
             true,
             inputManager,
-            1
+            1,
+            biscoitos
         );
 
         jogador2 = new Jogador(
@@ -104,7 +108,8 @@ public class GamePanel extends JPanel {
             280,
             false,
             inputManager,
-            2
+            2,
+            biscoitos
         );
 
         carregarCenario(arquivoCenario);
@@ -182,6 +187,15 @@ public class GamePanel extends JPanel {
 
         verificarGolpe(jogador1, jogador2);
         verificarGolpe(jogador2, jogador1);
+
+        for(Biscoito b : biscoitos){
+            b.atualizar();
+        }
+
+        verificarBiscoitos();
+
+        biscoitos.removeIf(b -> !b.isAtivo());
+
 
         atualizarTemporizador();
         verificarFimDeJogo();
@@ -453,6 +467,9 @@ public class GamePanel extends JPanel {
         // 4) HUD (vida + tempo)
         desenharHud(g);
 
+        for(Biscoito b : biscoitos){
+            b.desenhar(g);
+        }
         if(estadoLuta == EstadoLuta.CONTAGEM){
             desenharContagem(g);
         }
@@ -737,6 +754,33 @@ public class GamePanel extends JPanel {
             }
 
             g.fillOval(x + 2, y + 2, diametro - 4, diametro - 4);
+        }
+    }
+
+    private void verificarBiscoitos(){
+
+        for(Biscoito b : biscoitos){
+
+            if(!b.isAtivo())
+                continue;
+
+
+            if(b.getHitbox().intersects(jogador1.getHitbox().getArea())){
+
+                jogador1.receberDano(10);
+
+                b.desativar();
+
+            }
+
+
+            if(b.getHitbox().intersects(jogador2.getHitbox().getArea())){
+
+                jogador2.receberDano(10);
+
+                b.desativar();
+
+            }
         }
     }
     

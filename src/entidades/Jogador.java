@@ -2,11 +2,13 @@ package entidades;
 
 import enums.Estado;
 import gerenciadores.InputManager;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.net.URL;
+import java.util.ArrayList;
+
 import javax.swing.ImageIcon;
-import java.awt.Color;
 
 public class Jogador extends Personagem {
     
@@ -16,13 +18,17 @@ public class Jogador extends Personagem {
 
     private boolean especialUsado = false;
 
-    public Jogador(LutadorUESB dados, int x, int y, boolean viradoDireita, InputManager input, int playerId) {
+    private ArrayList<Biscoito> biscoitos;
+
+    public Jogador(LutadorUESB dados, int x, int y, boolean viradoDireita, InputManager input, int playerId, ArrayList<Biscoito> biscoitos
+) {
 
         super(dados, x, y, dados.getLarguraSprite(), dados.getAlturaSprite());
         this.dados = dados;
         this.input = input;
         this.viradoDireita = viradoDireita;
         this.playerId = playerId;
+        this.biscoitos = biscoitos;
 
 
         parado = new Image[4];
@@ -266,8 +272,11 @@ public class Jogador extends Personagem {
             alturaHitbox = dados.getAlturaHitbox();
             ajusteY = dados.getAjusteY();
 
+        }else if(getNome().equals("EVERTON")){
+            forca = dados.getForca();
+            velocidade = dados.getVelocidade();
         }
-
+            
     }
 
     // =========================
@@ -324,7 +333,11 @@ public class Jogador extends Personagem {
             int alpha = (int)(70 + 50 *
                     Math.sin(System.currentTimeMillis() / 80.0));
 
-            g.setColor(new Color(255, 255, 255, alpha));
+            if(getNome().equals("EVERTON")){
+                g.setColor(new Color(255,215,0,100));
+            }else{
+                g.setColor(new Color(255, 255, 255, alpha));
+            }
 
             g.fillRoundRect(
                     x - 6,
@@ -370,7 +383,8 @@ public class Jogador extends Personagem {
         }else if(getNome().equals("ERICK")){
 
             ativarGigante();
-
+        }else if(getNome().equals("GIULIA")){
+            ativarChuvaBiscoitos();
         }
 
     }
@@ -379,9 +393,11 @@ public class Jogador extends Personagem {
 
         especialAtivo = true;
 
-        tempoEspecial = 300; // 5 segundos
+        tempoEspecial = DURACAO_ESPECIAL;
 
-        System.out.println("SUPER FORÇA ATIVADA!");
+        forca += 10;
+
+        velocidade -= 2;
 
     }
 
@@ -398,10 +414,42 @@ public class Jogador extends Personagem {
 
         forca += 8;
 
-        velocidade -= 2;
+        velocidade -= 8;
 
         ajusteY = -350;
 
+    }
+
+    private void ativarChuvaBiscoitos(){
+
+        especialAtivo = true;
+        tempoEspecial = DURACAO_ESPECIAL;
+        int posicaoX;
+        int posicaoY;
+
+        if(viradoDireita){
+
+            posicaoX = x + largura - 10;
+            //posicaoY = y + alturaHitbox - 20;
+            posicaoY = y + altura - 50;
+
+        }else{
+
+            posicaoX = x - 30;
+            posicaoY = y + alturaHitbox - 20;
+
+        }
+
+        for(int i = 0; i < 6; i++){
+
+            Biscoito b = new Biscoito(
+                posicaoX,
+                posicaoY - 120 + (i * 25),
+                viradoDireita
+            );
+
+            biscoitos.add(b);
+        }
     }
 
     // =========================
