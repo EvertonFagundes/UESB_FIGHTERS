@@ -5,6 +5,7 @@ import java.net.URL;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import java.util.Random;
 
 public class GerenciadorSom {
 
@@ -42,6 +43,16 @@ public class GerenciadorSom {
 
     public static final String WHOOSH =
             "/assets/sons/whoosh.wav";
+
+    public static final String[] DANO_MASCULINO = {
+        "/assets/sons/aah.wav",
+        "/assets/sons/gh.wav",
+        "/assets/sons/ghh.wav",
+        "/assets/sons/hff.wav"
+    };
+
+    public static final String DANO_FEMININO =
+            "/assets/sons/ungh.wav";
 
     private static Clip musicaMenu;
     private static Clip musicaLuta;
@@ -158,19 +169,27 @@ public class GerenciadorSom {
         tocarEfeito(JOGADOR2_VENCEU);
     }
 
-    /*public static void iniciarMusicaLuta() {
-        tocarMusica(MUSICA_LUTA);
-    }
-
-    public static void iniciarMusicaMenu() {
-        tocarMusica(MUSICA_MENU);
-    }*/
-
     public static void tocarSoco(){
         tocarEfeito(SOCO);
     }
 
     public static void tocarWhoosh(){
         tocarEfeito(WHOOSH);
+    }
+
+    public static void tocarDano(boolean feminino){
+
+        if(feminino){
+
+            tocarEfeito(DANO_FEMININO);
+
+        }else{
+            Random random = new Random();
+
+            int indice = random.nextInt(DANO_MASCULINO.length);
+
+            tocarEfeito(DANO_MASCULINO[indice]);
+
+        }
     }
 }

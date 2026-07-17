@@ -275,6 +275,9 @@ public class GamePanel extends JPanel {
 
                 // Recebe dano normal
                 alvo.receberDano(atacante.getDanoGolpeAtual());
+                if(atacante.getNome().equals("EVERTON") && atacante.isEspecialAtivo()){
+                        alvo.empurrar(500, atacante.isViradoDireita());
+                    }
                 atacante.adicionarEnergiaEspecial(8);
                 alvo.adicionarEnergiaEspecial(4);
 

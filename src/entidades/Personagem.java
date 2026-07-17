@@ -66,6 +66,8 @@ public abstract class Personagem {
 
     protected int ajusteY;
 
+    protected int empurrao = 0;
+
     protected static final int GRAVIDADE = 1;
     protected static final int FORCA_PULO = -18;
     protected static final int DURACAO_ATAQUE = 15;
@@ -146,6 +148,19 @@ public abstract class Personagem {
                     mudarEstado(Estado.PARADO);
                 }
             }
+        }
+
+        if(empurrao != 0){
+
+            x += empurrao / 8;
+
+            if(empurrao > 0)
+                empurrao -= 8;
+            else
+                empurrao += 8;
+
+            if(Math.abs(empurrao) < 8)
+                empurrao = 0;
         }
     }
 
@@ -433,6 +448,7 @@ public abstract class Personagem {
             vida = 0;
 
         recebendoDano = true;
+
         tempoDano = DURACAO_DANO;
 
         atacando = false;
@@ -454,6 +470,15 @@ public abstract class Personagem {
             mudarEstado(Estado.PARADO);
 
         }
+    }
+
+    public void aplicarEmpurrao(int distancia, boolean direita){
+
+        if(direita)
+            empurrao = distancia;
+        else
+            empurrao = -distancia;
+
     }
 
     // Verifica se morreu
@@ -520,8 +545,16 @@ public abstract class Personagem {
     }
 
     public void consumirEnergiaEspecial(){
-
         energiaEspecial = 0;
+    }
+
+    public void empurrar(int distancia, boolean paraDireita){
+
+        if(paraDireita){
+            x += distancia;
+        }else{
+            x -= distancia;
+        }
 
     }
 

@@ -1,6 +1,7 @@
 package entidades;
 
 import enums.Estado;
+import gerenciadores.GerenciadorSom;
 import gerenciadores.InputManager;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -450,6 +451,21 @@ public class Jogador extends Personagem {
 
             biscoitos.add(b);
         }
+    }
+
+    @Override
+    public void receberDano(int dano){
+
+        if(recebendoDano)
+            return;
+
+        if(getNome().equals("GIULIA")){
+            GerenciadorSom.tocarDano(true);
+        }else{
+            GerenciadorSom.tocarDano(false);
+        }
+
+        super.receberDano(dano);
     }
 
     // =========================
