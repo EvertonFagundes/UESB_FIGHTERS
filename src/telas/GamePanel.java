@@ -33,6 +33,9 @@ public class GamePanel extends JPanel {
     private Jogador jogador1;
     private Jogador jogador2;
 
+    private Jogador vencedor;
+    private Jogador perdedor;
+
     // teclas que estão sendo seguradas nesse momento
     private final Set<Integer> teclasPressionadas = new HashSet<>();
 
@@ -48,10 +51,23 @@ public class GamePanel extends JPanel {
     private String mensagemFinal = "";
     private InputManager inputManager;
 
+    private boolean pausado = false;
+
+    private int opcaoMenu = 0;
+
+    private final String[] opcoes = {
+        "RETORNAR",
+        "TELA INICIAL",
+        "SAIR"
+    };
+
     private GerenciadorRounds gerenciadorRounds;
 
     // tempo que o K.O. fica na tela (2 segundos)
     private int tempoKO = 120;
+    private boolean mostrarKO = false;
+    private int tempoAntesKO = 300; // 5 segundos (60 FPS)
+
     // indica que estamos esperando para iniciar o próximo round
     private boolean esperandoProximoRound = false;
 
@@ -67,6 +83,8 @@ public class GamePanel extends JPanel {
     private String textoRound = "";
     private ArrayList<Biscoito> biscoitos = new ArrayList<>();
 
+    private GerenciadorTelas janela;
+
     public GamePanel(
         GerenciadorTelas janela,
         int player1,
@@ -79,6 +97,8 @@ public class GamePanel extends JPanel {
         if (cenarioUrl != null) {
             cenario = new ImageIcon(cenarioUrl).getImage();
         }
+
+        this.janela = janela;
 
         inputManager = new InputManager();
         addKeyListener(inputManager);
@@ -140,6 +160,14 @@ public class GamePanel extends JPanel {
 
     public void atualizarJogo() {
 
+        atualizarPause();
+
+        if (pausado) {
+            atualizarMenuPause();
+            repaint();
+            return;
+        }
+
         if (esperandoProximoRound) {
 
             tempoKO--;
@@ -159,6 +187,47 @@ public class GamePanel extends JPanel {
             return;
         }
 
+        if (jogoEncerrado && !mostrarKO) {
+
+            jogador1.atualizar();
+            jogador2.atualizar();
+
+            tempoAntesKO--;
+
+            if (tempoAntesKO <= 0) {
+
+                mostrarKO = true;
+                tempoKO = 120;
+
+            }
+
+            repaint();
+            return;
+        }
+
+        if (mostrarKO) {
+
+            tempoKO--;
+
+            if (tempoKO <= 0) {
+
+                mostrarKO = false;
+
+                if (gerenciadorRounds.lutaTerminou()) {
+
+                    // aqui pode voltar ao menu ou tela final
+
+                } else {
+
+                    esperandoProximoRound = true;
+
+                }
+            }
+
+            repaint();
+            return;
+        }
+
          if (estadoLuta == EstadoLuta.CONTAGEM) {
             atualizarContagem();
 
@@ -166,7 +235,14 @@ public class GamePanel extends JPanel {
         }
 
 
-        if (jogoEncerrado) return;
+        if (jogoEncerrado) {
+
+            jogador1.atualizar();
+            jogador2.atualizar();
+
+            repaint();
+            return;
+        }
 
         limitarNaTela(jogador1);
         limitarNaTela(jogador2);
@@ -380,15 +456,22 @@ public class GamePanel extends JPanel {
 
                 if (gerenciadorRounds.vencedorFinal() == 1) {
 
+                    jogador1.vencer();
+                    jogador2.perder();
+
                     mensagemFinal =
                         jogador1.getNome() + " VENCEU A LUTA!";
 
                 } else {
 
+                    jogador2.vencer();
+                    jogador1.perder();
+
                     mensagemFinal =
                         jogador2.getNome() + " VENCEU A LUTA!";
                 }
 
+                return;
             } else {
 
                 mensagemFinal =
@@ -477,8 +560,12 @@ public class GamePanel extends JPanel {
             desenharContagem(g);
         }
 
-        if (jogoEncerrado) {
+        if (mostrarKO) {
             desenharFimDeJogo(g);
+        }
+
+        if(pausado){
+            desenharMenuPause(g);
         }
     }
 
@@ -784,6 +871,105 @@ public class GamePanel extends JPanel {
                 b.desativar();
 
             }
+        }
+    }
+
+    private void atualizarPause(){
+
+        if(inputManager.pause){
+
+            pausado = !pausado;
+
+            inputManager.pause = false;
+        }
+    }
+
+    private void atualizarMenuPause() {
+
+        if (inputManager.cimaMenu) {
+
+            opcaoMenu--;
+
+            if (opcaoMenu < 0)
+                opcaoMenu = opcoes.length - 1;
+
+            inputManager.cimaMenu = false;
+        }
+
+        if (inputManager.baixoMenu) {
+
+            opcaoMenu++;
+
+            if (opcaoMenu >= opcoes.length)
+                opcaoMenu = 0;
+
+            inputManager.baixoMenu = false;
+        }
+
+        if (inputManager.confirmar) {
+
+            switch (opcaoMenu) {
+
+                case 0: // Retornar
+                    pausado = false;
+                    break;
+
+                case 1: // Tela inicial
+
+                    loop.encerrar();
+
+                    GerenciadorSom.pararMusica();
+
+                    janela.trocarTela(new MenuPanel(janela));
+
+                    break;
+
+                case 2: // Sair
+
+                    System.exit(0);
+
+                    break;
+            }
+
+            inputManager.confirmar = false;
+        }
+    }
+
+    private void desenharMenuPause(Graphics g) {
+
+        g.setColor(new Color(0, 0, 0, 180));
+        g.fillRect(0, 0, getWidth(), getHeight());
+
+        g.setFont(new Font("Arial", Font.BOLD, 60));
+        g.setColor(Color.WHITE);
+
+        String titulo = "PAUSE";
+
+        int largura = g.getFontMetrics().stringWidth(titulo);
+
+        g.drawString(
+            titulo,
+            (getWidth() - largura) / 2,
+            180
+        );
+
+        g.setFont(new Font("Arial", Font.BOLD, 36));
+
+        for (int i = 0; i < opcoes.length; i++) {
+
+            if (i == opcaoMenu) {
+                g.setColor(Color.YELLOW);
+            } else {
+                g.setColor(Color.WHITE);
+            }
+
+            int l = g.getFontMetrics().stringWidth(opcoes[i]);
+
+            g.drawString(
+                opcoes[i],
+                (getWidth() - l) / 2,
+                280 + i * 60
+            );
         }
     }
     

@@ -328,6 +328,26 @@ public abstract class Personagem {
                     }
 
                     break;
+
+                case VITORIA:
+
+                    frameAtual++;
+
+                    if(frameAtual >= vitoria.length){
+                        frameAtual = vitoria.length - 1;
+                    }
+
+                    break;
+
+                case DERROTA:
+
+                    frameAtual++;
+
+                    if(frameAtual >= derrota.length){
+                        frameAtual = derrota.length - 1;
+                    }
+
+                    break;
             }
 
     }
@@ -555,6 +575,18 @@ public abstract class Personagem {
         }else{
             x -= distancia;
         }
+
+    }
+
+    public void vencer(){
+
+        mudarEstado(Estado.VITORIA);
+
+    }
+
+    public void perder(){
+
+        mudarEstado(Estado.DERROTA);
 
     }
 

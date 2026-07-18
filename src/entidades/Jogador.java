@@ -132,6 +132,12 @@ public class Jogador extends Personagem {
     @Override
     public void atualizar() {
 
+        if(estado == Estado.VITORIA || estado == Estado.DERROTA){
+
+            atualizarAnimacao();
+            return;
+        }
+
         boolean movendo = false;
 
         if(recebendoDano){
@@ -320,6 +326,14 @@ public class Jogador extends Personagem {
 
             case DANO:
                 sprite = dano[frameAtual];
+                break;
+
+            case VITORIA:
+                sprite = vitoria[frameAtual];
+                break;
+
+            case DERROTA:
+                sprite = derrota[frameAtual];
                 break;
 
             default:
