@@ -16,6 +16,7 @@ public abstract class Personagem {
     protected int altura;
 
     protected int vida;
+    protected int energiaEspecial;
 
     protected int velocidade;
 
@@ -65,6 +66,8 @@ public abstract class Personagem {
 
     protected int ajusteY;
 
+    protected int empurrao = 0;
+
     protected static final int GRAVIDADE = 1;
     protected static final int FORCA_PULO = -18;
     protected static final int DURACAO_ATAQUE = 15;
@@ -73,6 +76,13 @@ public abstract class Personagem {
     protected boolean recebendoDano;
     protected int tempoDano;
     protected static final int DURACAO_DANO = 18;
+
+    protected boolean especialAtivo;
+    protected int tempoEspecial;
+    protected static final int DURACAO_ESPECIAL = 300; // 5 segundos (60 FPS)
+
+    protected int larguraOriginal;
+    protected int alturaOriginal;
 
     protected InputManager input;
 
@@ -89,6 +99,10 @@ public abstract class Personagem {
         this.larguraHitbox = dados.getLarguraHitbox();
         this.alturaHitbox = dados.getAlturaHitbox();
         this.ajusteY = dados.getAjusteY();
+        this.energiaEspecial = 0;
+
+        this.largura = largura;
+        this.altura = altura;
 
 		this.frameAtual = 0;
 
@@ -134,6 +148,19 @@ public abstract class Personagem {
                     mudarEstado(Estado.PARADO);
                 }
             }
+        }
+
+        if(empurrao != 0){
+
+            x += empurrao / 8;
+
+            if(empurrao > 0)
+                empurrao -= 8;
+            else
+                empurrao += 8;
+
+            if(Math.abs(empurrao) < 8)
+                empurrao = 0;
         }
     }
 
@@ -183,8 +210,14 @@ public abstract class Personagem {
             default:
                 bonusGolpe = 2;
         }
+        int dano = forca + bonusGolpe;
 
-        return forca + bonusGolpe;
+        if(especialAtivo){
+            dano *= 1.5;
+        }
+
+        return dano;
+        //return forca + bonusGolpe;
     }
 
     // Área de colisão real, um pouco menor que o sprite inteiro
@@ -295,7 +328,36 @@ public abstract class Personagem {
                     }
 
                     break;
+
+                case VITORIA:
+
+                    frameAtual++;
+
+                    if(frameAtual >= vitoria.length){
+                        frameAtual = vitoria.length - 1;
+                    }
+
+                    break;
+
+                case DERROTA:
+
+                    frameAtual++;
+
+                    if(frameAtual >= derrota.length){
+                        frameAtual = derrota.length - 1;
+                    }
+
+                    break;
             }
+
+    }
+
+    protected void atualizarEspecial(){
+
+        if(!especialAtivo)
+            return;
+
+        tempoEspecial--;
 
     }
 
@@ -406,6 +468,7 @@ public abstract class Personagem {
             vida = 0;
 
         recebendoDano = true;
+
         tempoDano = DURACAO_DANO;
 
         atacando = false;
@@ -427,6 +490,15 @@ public abstract class Personagem {
             mudarEstado(Estado.PARADO);
 
         }
+    }
+
+    public void aplicarEmpurrao(int distancia, boolean direita){
+
+        if(direita)
+            empurrao = distancia;
+        else
+            empurrao = -distancia;
+
     }
 
     // Verifica se morreu
@@ -468,6 +540,58 @@ public abstract class Personagem {
         this.vida = vida;
     }
 
+    public int getEnergiaEspecial() {
+        return energiaEspecial;
+    }
+
+    public void setEnergiaEspecial(int energiaEspecial) {
+
+        if (energiaEspecial < 0)
+            energiaEspecial = 0;
+
+        if (energiaEspecial > 100)
+            energiaEspecial = 100;
+
+        this.energiaEspecial = energiaEspecial;
+    }
+
+    public void adicionarEnergiaEspecial(int valor){
+
+        energiaEspecial += valor;
+
+        if(energiaEspecial > 100){
+            energiaEspecial = 100;
+        }
+    }
+
+    public void consumirEnergiaEspecial(){
+        energiaEspecial = 0;
+    }
+
+    public void empurrar(int distancia, boolean paraDireita){
+
+        if(paraDireita){
+            x += distancia;
+        }else{
+            x -= distancia;
+        }
+
+    }
+
+    public void vencer(){
+
+        mudarEstado(Estado.VITORIA);
+
+    }
+
+    public void perder(){
+
+        mudarEstado(Estado.DERROTA);
+
+    }
+
+    public abstract void usarEspecial();
+
     public int getVelocidade() {
         return velocidade;
     }
@@ -502,6 +626,10 @@ public abstract class Personagem {
 
     public boolean isGolpeAcertou() {
         return golpeAcertou;
+    }
+
+    public boolean isEspecialAtivo() {
+        return especialAtivo;
     }
 
     public void setGolpeAcertou(boolean golpeAcertou) {

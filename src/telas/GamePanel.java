@@ -1,10 +1,12 @@
 package telas;
 
+import entidades.Biscoito;
 import entidades.Jogador;
 import entidades.LutadorUESB;
 import gerenciadores.BancoLutadores;
 import gerenciadores.GameLoop;
 import gerenciadores.GerenciadorRounds;
+import gerenciadores.GerenciadorSom;
 import gerenciadores.GerenciadorTelas;
 import gerenciadores.InputManager;
 import java.awt.Color;
@@ -12,12 +14,12 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import gerenciadores.GerenciadorSom;
 
 public class GamePanel extends JPanel {
 
@@ -30,6 +32,9 @@ public class GamePanel extends JPanel {
 
     private Jogador jogador1;
     private Jogador jogador2;
+
+    private Jogador vencedor;
+    private Jogador perdedor;
 
     // teclas que estão sendo seguradas nesse momento
     private final Set<Integer> teclasPressionadas = new HashSet<>();
@@ -46,10 +51,23 @@ public class GamePanel extends JPanel {
     private String mensagemFinal = "";
     private InputManager inputManager;
 
+    private boolean pausado = false;
+
+    private int opcaoMenu = 0;
+
+    private final String[] opcoes = {
+        "RETORNAR",
+        "TELA INICIAL",
+        "SAIR"
+    };
+
     private GerenciadorRounds gerenciadorRounds;
 
     // tempo que o K.O. fica na tela (2 segundos)
     private int tempoKO = 120;
+    private boolean mostrarKO = false;
+    private int tempoAntesKO = 300; // 5 segundos (60 FPS)
+
     // indica que estamos esperando para iniciar o próximo round
     private boolean esperandoProximoRound = false;
 
@@ -63,6 +81,9 @@ public class GamePanel extends JPanel {
     private int contadorRound = 0;
     private int tempoContagem = 300; // 4 segundos em 60 FPS
     private String textoRound = "";
+    private ArrayList<Biscoito> biscoitos = new ArrayList<>();
+
+    private GerenciadorTelas janela;
 
     public GamePanel(
         GerenciadorTelas janela,
@@ -77,6 +98,8 @@ public class GamePanel extends JPanel {
             cenario = new ImageIcon(cenarioUrl).getImage();
         }
 
+        this.janela = janela;
+
         inputManager = new InputManager();
         addKeyListener(inputManager);
         System.out.println("INPUT OK");
@@ -87,13 +110,16 @@ public class GamePanel extends JPanel {
         LutadorUESB lutador1 = BancoLutadores.get(player1);
         LutadorUESB lutador2 = BancoLutadores.get(player2);
 
+        biscoitos = new ArrayList<>();
+
         jogador1 = new Jogador(
             lutador1,
             100,
             280,
             true,
             inputManager,
-            1
+            1,
+            biscoitos
         );
 
         jogador2 = new Jogador(
@@ -102,7 +128,8 @@ public class GamePanel extends JPanel {
             280,
             false,
             inputManager,
-            2
+            2,
+            biscoitos
         );
 
         carregarCenario(arquivoCenario);
@@ -133,6 +160,14 @@ public class GamePanel extends JPanel {
 
     public void atualizarJogo() {
 
+        atualizarPause();
+
+        if (pausado) {
+            atualizarMenuPause();
+            repaint();
+            return;
+        }
+
         if (esperandoProximoRound) {
 
             tempoKO--;
@@ -152,6 +187,47 @@ public class GamePanel extends JPanel {
             return;
         }
 
+        if (jogoEncerrado && !mostrarKO) {
+
+            jogador1.atualizar();
+            jogador2.atualizar();
+
+            tempoAntesKO--;
+
+            if (tempoAntesKO <= 0) {
+
+                mostrarKO = true;
+                tempoKO = 120;
+
+            }
+
+            repaint();
+            return;
+        }
+
+        if (mostrarKO) {
+
+            tempoKO--;
+
+            if (tempoKO <= 0) {
+
+                mostrarKO = false;
+
+                if (gerenciadorRounds.lutaTerminou()) {
+
+                    // aqui pode voltar ao menu ou tela final
+
+                } else {
+
+                    esperandoProximoRound = true;
+
+                }
+            }
+
+            repaint();
+            return;
+        }
+
          if (estadoLuta == EstadoLuta.CONTAGEM) {
             atualizarContagem();
 
@@ -159,12 +235,22 @@ public class GamePanel extends JPanel {
         }
 
 
-        if (jogoEncerrado) return;
+        if (jogoEncerrado) {
+
+            jogador1.atualizar();
+            jogador2.atualizar();
+
+            repaint();
+            return;
+        }
 
         limitarNaTela(jogador1);
         limitarNaTela(jogador2);
 
-        if (jogador1.getX() < jogador2.getX()) {
+        int centro1 = jogador1.getHitbox().getCentroX();
+        int centro2 = jogador2.getHitbox().getCentroX();
+
+        if (centro1 < centro2) {
             jogador1.setViradoDireita(true);
             jogador2.setViradoDireita(false);
         } else {
@@ -177,6 +263,15 @@ public class GamePanel extends JPanel {
 
         verificarGolpe(jogador1, jogador2);
         verificarGolpe(jogador2, jogador1);
+
+        for(Biscoito b : biscoitos){
+            b.atualizar();
+        }
+
+        verificarBiscoitos();
+
+        biscoitos.removeIf(b -> !b.isAtivo());
+
 
         atualizarTemporizador();
         verificarFimDeJogo();
@@ -246,6 +341,9 @@ public class GamePanel extends JPanel {
                 // Recebe apenas parte do dano
                 alvo.receberDano(atacante.getDanoGolpeAtual() / 4);
 
+                atacante.adicionarEnergiaEspecial(3);
+                alvo.adicionarEnergiaEspecial(2);
+
                 // Som de bloqueio
                 //GerenciadorSom.tocarBloqueio();
 
@@ -253,6 +351,11 @@ public class GamePanel extends JPanel {
 
                 // Recebe dano normal
                 alvo.receberDano(atacante.getDanoGolpeAtual());
+                if(atacante.getNome().equals("EVERTON") && atacante.isEspecialAtivo()){
+                        alvo.empurrar(500, atacante.isViradoDireita());
+                    }
+                atacante.adicionarEnergiaEspecial(8);
+                alvo.adicionarEnergiaEspecial(4);
 
                 // Som do impacto
                 GerenciadorSom.tocarSoco();
@@ -353,15 +456,22 @@ public class GamePanel extends JPanel {
 
                 if (gerenciadorRounds.vencedorFinal() == 1) {
 
+                    jogador1.vencer();
+                    jogador2.perder();
+
                     mensagemFinal =
                         jogador1.getNome() + " VENCEU A LUTA!";
 
                 } else {
 
+                    jogador2.vencer();
+                    jogador1.perder();
+
                     mensagemFinal =
                         jogador2.getNome() + " VENCEU A LUTA!";
                 }
 
+                return;
             } else {
 
                 mensagemFinal =
@@ -443,12 +553,19 @@ public class GamePanel extends JPanel {
         // 4) HUD (vida + tempo)
         desenharHud(g);
 
+        for(Biscoito b : biscoitos){
+            b.desenhar(g);
+        }
         if(estadoLuta == EstadoLuta.CONTAGEM){
             desenharContagem(g);
         }
 
-        if (jogoEncerrado) {
+        if (mostrarKO) {
             desenharFimDeJogo(g);
+        }
+
+        if(pausado){
+            desenharMenuPause(g);
         }
     }
 
@@ -486,12 +603,28 @@ public class GamePanel extends JPanel {
             false
         );
 
+        desenharBarraEspecial(
+            g,
+            jogador1,
+            40,
+            65,
+            false
+        );
+
         desenharBarraDeVida(
             g,
             jogador2,
             getWidth() - 40 - LARGURA_BARRA,
             30,
             jogador2.getNome(),
+            true
+        );
+
+        desenharBarraEspecial(
+            g,
+            jogador2,
+            getWidth() - 40 - LARGURA_BARRA,
+            65,
             true
         );
 
@@ -567,6 +700,71 @@ public class GamePanel extends JPanel {
         g.drawRect(x, y, LARGURA_BARRA, ALTURA_BARRA);
     }
 
+    private void desenharBarraEspecial(
+        Graphics g,
+        Jogador jogador,
+        int x,
+        int y,
+        boolean cresceDaDireita) {
+
+        int largura = LARGURA_BARRA;
+        int altura = 12;
+
+        // fundo
+        g.setColor(Color.DARK_GRAY);
+        g.fillRect(x, y, largura, altura);
+
+        double percentual = jogador.getEnergiaEspecial() / 100.0;
+
+        if(percentual < 0)
+            percentual = 0;
+
+        int larguraAtual = (int)(largura * percentual);
+        if (jogador.isEspecialAtivo()) {
+
+            if ((System.currentTimeMillis() / 150) % 2 == 0) {
+                g.setColor(new Color(255,215,0)); // dourado
+            } else {
+                g.setColor(Color.YELLOW);
+            }
+
+        } else if (jogador.getEnergiaEspecial() >= 100) {
+
+            if ((System.currentTimeMillis() / 200) % 2 == 0) {
+                g.setColor(Color.YELLOW);
+            } else {
+                g.setColor(Color.ORANGE);
+            }
+
+        } else {
+
+            g.setColor(Color.CYAN);
+
+        }
+        if(cresceDaDireita){
+
+            g.fillRect(
+                x + largura - larguraAtual,
+                y,
+                larguraAtual,
+                altura
+            );
+
+        }else{
+
+            g.fillRect(
+                x,
+                y,
+                larguraAtual,
+                altura
+            );
+
+        }
+
+        g.setColor(Color.WHITE);
+        g.drawRect(x, y, largura, altura);
+    }
+
     private void desenharFimDeJogo(Graphics g) {
 
         g.setColor(new Color(0, 0, 0, 170));
@@ -601,7 +799,7 @@ public class GamePanel extends JPanel {
 
     private void desenharVitorias(Graphics g) {
 
-        int y = 75;
+        int y = 85;
 
         int diametro = 20;
         int espacamento = 30;
@@ -646,6 +844,132 @@ public class GamePanel extends JPanel {
             }
 
             g.fillOval(x + 2, y + 2, diametro - 4, diametro - 4);
+        }
+    }
+
+    private void verificarBiscoitos(){
+
+        for(Biscoito b : biscoitos){
+
+            if(!b.isAtivo())
+                continue;
+
+
+            if(b.getHitbox().intersects(jogador1.getHitbox().getArea())){
+
+                jogador1.receberDano(10);
+
+                b.desativar();
+
+            }
+
+
+            if(b.getHitbox().intersects(jogador2.getHitbox().getArea())){
+
+                jogador2.receberDano(10);
+
+                b.desativar();
+
+            }
+        }
+    }
+
+    private void atualizarPause(){
+
+        if(inputManager.pause){
+
+            pausado = !pausado;
+
+            inputManager.pause = false;
+        }
+    }
+
+    private void atualizarMenuPause() {
+
+        if (inputManager.cimaMenu) {
+
+            opcaoMenu--;
+
+            if (opcaoMenu < 0)
+                opcaoMenu = opcoes.length - 1;
+
+            inputManager.cimaMenu = false;
+        }
+
+        if (inputManager.baixoMenu) {
+
+            opcaoMenu++;
+
+            if (opcaoMenu >= opcoes.length)
+                opcaoMenu = 0;
+
+            inputManager.baixoMenu = false;
+        }
+
+        if (inputManager.confirmar) {
+
+            switch (opcaoMenu) {
+
+                case 0: // Retornar
+                    pausado = false;
+                    break;
+
+                case 1: // Tela inicial
+
+                    loop.encerrar();
+
+                    GerenciadorSom.pararMusica();
+
+                    janela.trocarTela(new MenuPanel(janela));
+
+                    break;
+
+                case 2: // Sair
+
+                    System.exit(0);
+
+                    break;
+            }
+
+            inputManager.confirmar = false;
+        }
+    }
+
+    private void desenharMenuPause(Graphics g) {
+
+        g.setColor(new Color(0, 0, 0, 180));
+        g.fillRect(0, 0, getWidth(), getHeight());
+
+        g.setFont(new Font("Arial", Font.BOLD, 60));
+        g.setColor(Color.WHITE);
+
+        String titulo = "PAUSE";
+
+        int largura = g.getFontMetrics().stringWidth(titulo);
+
+        g.drawString(
+            titulo,
+            (getWidth() - largura) / 2,
+            180
+        );
+
+        g.setFont(new Font("Arial", Font.BOLD, 36));
+
+        for (int i = 0; i < opcoes.length; i++) {
+
+            if (i == opcaoMenu) {
+                g.setColor(Color.YELLOW);
+            } else {
+                g.setColor(Color.WHITE);
+            }
+
+            int l = g.getFontMetrics().stringWidth(opcoes[i]);
+
+            g.drawString(
+                opcoes[i],
+                (getWidth() - l) / 2,
+                280 + i * 60
+            );
         }
     }
     

@@ -1,12 +1,15 @@
 package entidades;
 
 import enums.Estado;
+import gerenciadores.GerenciadorSom;
 import gerenciadores.InputManager;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.net.URL;
+import java.util.ArrayList;
+
 import javax.swing.ImageIcon;
-import gerenciadores.GerenciadorSom;
 
 public class Jogador extends Personagem {
     
@@ -14,13 +17,19 @@ public class Jogador extends Personagem {
 
     private int playerId; // 1 ou 2
 
-    public Jogador(LutadorUESB dados, int x, int y, boolean viradoDireita, InputManager input, int playerId) {
+    private boolean especialUsado = false;
+
+    private ArrayList<Biscoito> biscoitos;
+
+    public Jogador(LutadorUESB dados, int x, int y, boolean viradoDireita, InputManager input, int playerId, ArrayList<Biscoito> biscoitos
+) {
 
         super(dados, x, y, dados.getLarguraSprite(), dados.getAlturaSprite());
         this.dados = dados;
         this.input = input;
         this.viradoDireita = viradoDireita;
         this.playerId = playerId;
+        this.biscoitos = biscoitos;
 
 
         parado = new Image[4];
@@ -123,6 +132,12 @@ public class Jogador extends Personagem {
     @Override
     public void atualizar() {
 
+        if(estado == Estado.VITORIA || estado == Estado.DERROTA){
+
+            atualizarAnimacao();
+            return;
+        }
+
         boolean movendo = false;
 
         if(recebendoDano){
@@ -140,13 +155,11 @@ public class Jogador extends Personagem {
 
             if (input.esquerdaP1) {
                 x -= velocidade;
-                viradoDireita = false;
                 movendo = true;
             }
 
             if (input.direitaP1) {
                 x += velocidade;
-                viradoDireita = true;
                 movendo = true;
             }
 
@@ -168,6 +181,18 @@ public class Jogador extends Personagem {
             }else{
                 pararBloqueio();
             }
+            if(input.especialP1 && !especialUsado){
+
+                usarEspecial();
+                especialUsado = true;
+
+            }
+
+            if(!input.especialP1){
+
+                especialUsado = false;
+
+            }
         }
 
         // =========================
@@ -177,13 +202,11 @@ public class Jogador extends Personagem {
 
             if (input.esquerdaP2) {
                 x -= velocidade;
-                viradoDireita = false;
                 movendo = true;
             }
 
             if (input.direitaP2) {
                 x += velocidade;
-                viradoDireita = true;
                 movendo = true;
             }
 
@@ -203,6 +226,18 @@ public class Jogador extends Personagem {
                 bloquear();
             }else{
                 pararBloqueio();
+            }
+            if(input.especialP2 && !especialUsado){
+
+                usarEspecial();
+                especialUsado = true;
+
+            }
+
+            if(!input.especialP2){
+
+                especialUsado = false;
+
             }
         }
 
@@ -224,6 +259,31 @@ public class Jogador extends Personagem {
         atualizarAtaque();
         atualizarAnimacao();
         atualizarDano();
+        atualizarEspecial();
+        if(especialAtivo && tempoEspecial <= 0){
+            desativarEspecial();
+        }
+    }
+
+    private void desativarEspecial(){
+
+        especialAtivo = false;
+
+        if(getNome().equals("ERICK")){
+
+            largura = dados.getLarguraSprite();
+            altura = dados.getAlturaSprite();
+            velocidade = dados.getVelocidade();
+            forca = dados.getForca();
+            larguraHitbox = dados.getLarguraHitbox();
+            alturaHitbox = dados.getAlturaHitbox();
+            ajusteY = dados.getAjusteY();
+
+        }else if(getNome().equals("EVERTON")){
+            forca = dados.getForca();
+            velocidade = dados.getVelocidade();
+        }
+            
     }
 
     // =========================
@@ -268,12 +328,41 @@ public class Jogador extends Personagem {
                 sprite = dano[frameAtual];
                 break;
 
+            case VITORIA:
+                sprite = vitoria[frameAtual];
+                break;
+
+            case DERROTA:
+                sprite = derrota[frameAtual];
+                break;
+
             default:
                 sprite = parado[0];
         }
 
         if (sprite == null)
             return;
+
+        if (especialAtivo) {
+
+            int alpha = (int)(70 + 50 *
+                    Math.sin(System.currentTimeMillis() / 80.0));
+
+            if(getNome().equals("EVERTON")){
+                g.setColor(new Color(255,215,0,100));
+            }else{
+                g.setColor(new Color(255, 255, 255, alpha));
+            }
+
+            g.fillRoundRect(
+                    x - 6,
+                    y + ajusteY - 6,
+                    largura + 12,
+                    altura + 12,
+                    18,
+                    18
+            );
+        }
 
         if (viradoDireita) {
 
@@ -290,6 +379,107 @@ public class Jogador extends Personagem {
                     null
             );
         }
+    }
+
+    @Override
+    public void usarEspecial(){
+
+        if(getEnergiaEspecial() < 100)
+            return;
+
+
+        consumirEnergiaEspecial();
+
+
+        if(getNome().equals("EVERTON")){
+
+            ativarSuperForca();
+
+        }else if(getNome().equals("ERICK")){
+
+            ativarGigante();
+        }else if(getNome().equals("GIULIA")){
+            ativarChuvaBiscoitos();
+        }
+
+    }
+
+    private void ativarSuperForca(){
+
+        especialAtivo = true;
+
+        tempoEspecial = DURACAO_ESPECIAL;
+
+        forca += 10;
+
+        velocidade -= 2;
+
+    }
+
+    private void ativarGigante(){
+
+        especialAtivo = true;
+
+        tempoEspecial = DURACAO_ESPECIAL;
+
+        largura = (int)(largura * 1.8);
+        altura = (int)(altura * 1.8);
+        alturaHitbox = (int)(alturaHitbox * 1.8);
+        larguraHitbox = (int)(larguraHitbox * 1.8);
+
+        forca += 8;
+
+        velocidade -= 8;
+
+        ajusteY = -350;
+
+    }
+
+    private void ativarChuvaBiscoitos(){
+
+        especialAtivo = true;
+        tempoEspecial = DURACAO_ESPECIAL;
+        int posicaoX;
+        int posicaoY;
+
+        if(viradoDireita){
+
+            posicaoX = x + largura - 10;
+            //posicaoY = y + alturaHitbox - 20;
+            posicaoY = y + altura - 50;
+
+        }else{
+
+            posicaoX = x - 30;
+            posicaoY = y + alturaHitbox - 20;
+
+        }
+
+        for(int i = 0; i < 6; i++){
+
+            Biscoito b = new Biscoito(
+                posicaoX,
+                posicaoY - 120 + (i * 25),
+                viradoDireita
+            );
+
+            biscoitos.add(b);
+        }
+    }
+
+    @Override
+    public void receberDano(int dano){
+
+        if(recebendoDano)
+            return;
+
+        if(getNome().equals("GIULIA")){
+            GerenciadorSom.tocarDano(true);
+        }else{
+            GerenciadorSom.tocarDano(false);
+        }
+
+        super.receberDano(dano);
     }
 
     // =========================

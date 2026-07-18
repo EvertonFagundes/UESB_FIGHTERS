@@ -1,16 +1,13 @@
 package telas;
 
+import gerenciadores.GerenciadorTelas;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
-
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
-import gerenciadores.GerenciadorTelas;
-import gerenciadores.InputManager;
 
 public class SelecaoPanel extends JPanel {
 
@@ -18,6 +15,7 @@ public class SelecaoPanel extends JPanel {
     private Image everton;
     private Image erick;
     private Image giulia;
+    private Image joao;
     private int selecionado = 0;
 
     private int jogadorAtual = 1;
@@ -69,6 +67,12 @@ public class SelecaoPanel extends JPanel {
             )
         ).getImage();
 
+        joao = new ImageIcon(
+            getClass().getResource(
+                "/assets/personagens/joao/joao.png"
+            )
+        ).getImage();
+
     //DIREITA
     getInputMap().put(
         javax.swing.KeyStroke.getKeyStroke("RIGHT"),
@@ -86,7 +90,7 @@ public class SelecaoPanel extends JPanel {
 
             selecionado++;
 
-            if (selecionado > 2) {
+            if (selecionado > 3) {
                 selecionado = 0;
             }
 
@@ -112,7 +116,7 @@ public class SelecaoPanel extends JPanel {
             selecionado--;
 
             if (selecionado < 0) {
-                selecionado = 2;
+                selecionado = 3;
             }
 
             repaint();
@@ -154,7 +158,7 @@ public class SelecaoPanel extends JPanel {
             g,
             everton,
             "EVERTON",
-            80,
+            60,
             220,
             0
         );
@@ -163,7 +167,7 @@ public class SelecaoPanel extends JPanel {
             g,
             erick,
             "ERICK",
-            430,
+            360,
             220,
             1
         );
@@ -172,9 +176,18 @@ public class SelecaoPanel extends JPanel {
             g,
             giulia,
             "GIULIA",
-            780,
+            660,
             220,
             2
+        );
+
+        desenharCard(
+            g,
+            joao,
+            "JOÃO",
+            960,
+            220,
+            3
         );
     }
 

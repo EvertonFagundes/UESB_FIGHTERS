@@ -11,6 +11,8 @@ public class GerenciadorTelas extends JFrame {
 
     public GerenciadorTelas() {
 
+        GerenciadorSom.inicializar();
+
         setTitle("UESB Fighters");
 
         setSize(1280, 720);

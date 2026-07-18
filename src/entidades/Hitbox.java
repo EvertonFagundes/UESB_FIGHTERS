@@ -20,4 +20,8 @@ public class Hitbox {
     public Rectangle getArea() {
         return area;
     }
+
+    public int getCentroX() {
+        return area.x + area.width / 2;
+    }
 }
