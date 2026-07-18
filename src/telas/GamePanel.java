@@ -261,6 +261,8 @@ public class GamePanel extends JPanel {
         jogador1.atualizar();
         jogador2.atualizar();
 
+        verificarEspecialJoao();
+
         verificarGolpe(jogador1, jogador2);
         verificarGolpe(jogador2, jogador1);
 
@@ -971,6 +973,42 @@ public class GamePanel extends JPanel {
                 280 + i * 60
             );
         }
+    }
+
+    private void verificarEspecialJoao(){
+
+        System.out.println(
+            "P1 = " + jogador1.getNome() +
+            " Especial = " + jogador1.isEspecialAtivo()
+        );
+
+        System.out.println(
+            "P2 = " + jogador2.getNome() +
+            " Especial = " + jogador2.isEspecialAtivo()
+        );
+
+        if(jogador1.getNome().equals("JOAO")
+                && jogador1.isEspecialAtivo()){
+        
+            System.out.println("JOAO P1 CONGELOU O P2");
+
+            jogador2.congelar(180);
+             jogador1.desativarEspecial();
+
+    
+        }
+
+        if(jogador2.getNome().equals("JOAO")
+                && jogador2.isEspecialAtivo()){
+
+                     System.out.println("JOAO P2 CONGELOU O P1");
+
+            jogador1.congelar(180);
+
+            jogador2.desativarEspecial();
+
+        }
+
     }
     
 }

@@ -8,7 +8,6 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.net.URL;
 import java.util.ArrayList;
-
 import javax.swing.ImageIcon;
 
 public class Jogador extends Personagem {
@@ -138,6 +137,19 @@ public class Jogador extends Personagem {
             return;
         }
 
+        atualizarCongelamento();
+
+        if(congelado){
+            System.out.println(getNome() + " está congelado");
+            estado = Estado.PARADO;
+            frameAtual = 0;
+            contadorAnimacao = 0;
+            //atualizarAnimacao();
+
+            return;
+
+        }
+
         boolean movendo = false;
 
         if(recebendoDano){
@@ -182,6 +194,7 @@ public class Jogador extends Personagem {
                 pararBloqueio();
             }
             if(input.especialP1 && !especialUsado){
+                System.out.println("APERTEI O ESPECIAL P1");
 
                 usarEspecial();
                 especialUsado = true;
@@ -228,6 +241,7 @@ public class Jogador extends Personagem {
                 pararBloqueio();
             }
             if(input.especialP2 && !especialUsado){
+                System.out.println("APERTEI O ESPECIAL P2");
 
                 usarEspecial();
                 especialUsado = true;
@@ -265,7 +279,11 @@ public class Jogador extends Personagem {
         }
     }
 
-    private void desativarEspecial(){
+    public void desativarEspecial(){
+
+        System.out.println("DESATIVOU ESPECIAL");
+
+        Thread.dumpStack();
 
         especialAtivo = false;
 
@@ -379,10 +397,26 @@ public class Jogador extends Personagem {
                     null
             );
         }
+
+        if(congelado){             
+            g.setColor(new Color(80,170,255,120));
+
+            g.fillRoundRect(
+                x-6,
+                y+ajusteY-6,
+                largura+12,
+                altura+12,
+                20,
+                20
+            );
+
+        }
     }
 
     @Override
     public void usarEspecial(){
+        System.out.println("ENTROU NO USAR ESPECIAL");
+        System.out.println("especialAtivo = " + especialAtivo);
 
         if(getEnergiaEspecial() < 100)
             return;
@@ -400,8 +434,19 @@ public class Jogador extends Personagem {
             ativarGigante();
         }else if(getNome().equals("GIULIA")){
             ativarChuvaBiscoitos();
+        }else if(getNome().equals("JOAO")){
+            ativarHack();
+
+            System.out.println("Depois do hack = " + especialAtivo);
         }
 
+    }
+
+    private void ativarHack(){
+        especialAtivo = true;
+        tempoEspecial = DURACAO_ESPECIAL;
+        System.out.println("ATIVOU O HACK");
+        System.out.println("especialAtivo = " + especialAtivo);
     }
 
     private void ativarSuperForca(){

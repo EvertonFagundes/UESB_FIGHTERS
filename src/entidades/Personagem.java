@@ -84,6 +84,9 @@ public abstract class Personagem {
     protected int larguraOriginal;
     protected int alturaOriginal;
 
+    protected boolean congelado = false;
+    protected int tempoCongelado = 0;
+
     protected InputManager input;
 
     public Personagem(LutadorUESB dados, int x, int y, int largura, int altura) {
@@ -565,7 +568,9 @@ public abstract class Personagem {
     }
 
     public void consumirEnergiaEspecial(){
+        System.out.println("Energia: " + getEnergiaEspecial());
         energiaEspecial = 0;
+        System.out.println("Energia: " + getEnergiaEspecial());
     }
 
     public void empurrar(int distancia, boolean paraDireita){
@@ -594,6 +599,41 @@ public abstract class Personagem {
 
     public int getVelocidade() {
         return velocidade;
+    }
+
+    public void congelar(int tempo){
+        System.out.println("CONGELADO");
+
+        congelado = true;
+        tempoCongelado = tempo;
+
+        mudarEstado(Estado.PARADO);
+        frameAtual = 0;
+
+    }
+
+    protected void atualizarCongelamento(){
+
+        if(!congelado)
+            return;
+
+        tempoCongelado--;
+
+        if(tempoCongelado <= 0){
+
+            congelado = false;
+
+            mudarEstado(Estado.PARADO);
+            frameAtual = 0;
+            contadorAnimacao = 0;
+
+        }
+
+    }
+    public boolean isCongelado(){
+
+        return congelado;
+
     }
 
     public void setVelocidade(int velocidade) {
