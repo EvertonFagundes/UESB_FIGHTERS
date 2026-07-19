@@ -568,9 +568,7 @@ public abstract class Personagem {
     }
 
     public void consumirEnergiaEspecial(){
-        System.out.println("Energia: " + getEnergiaEspecial());
         energiaEspecial = 0;
-        System.out.println("Energia: " + getEnergiaEspecial());
     }
 
     public void empurrar(int distancia, boolean paraDireita){
@@ -602,8 +600,6 @@ public abstract class Personagem {
     }
 
     public void congelar(int tempo){
-        System.out.println("CONGELADO");
-
         congelado = true;
         tempoCongelado = tempo;
 

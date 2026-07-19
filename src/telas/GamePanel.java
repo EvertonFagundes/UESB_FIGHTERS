@@ -327,9 +327,6 @@ public class GamePanel extends JPanel {
 
     }
 
-    // aplica dano quando um golpe em andamento encosta no adversário
-    // (o dano já leva em conta a força do personagem + o golpe usado,
-    // calculado lá no Personagem.calcularDano)
     private void verificarGolpe(Jogador atacante, Jogador alvo) {
 
         if (!atacante.isAtacando() || atacante.isGolpeAcertou()) {
@@ -977,34 +974,15 @@ public class GamePanel extends JPanel {
 
     private void verificarEspecialJoao(){
 
-        System.out.println(
-            "P1 = " + jogador1.getNome() +
-            " Especial = " + jogador1.isEspecialAtivo()
-        );
-
-        System.out.println(
-            "P2 = " + jogador2.getNome() +
-            " Especial = " + jogador2.isEspecialAtivo()
-        );
-
-        if(jogador1.getNome().equals("JOAO")
-                && jogador1.isEspecialAtivo()){
-        
-            System.out.println("JOAO P1 CONGELOU O P2");
+        if(jogador1.getNome().equals("JOAO") && jogador1.isEspecialAtivo()){
 
             jogador2.congelar(180);
-             jogador1.desativarEspecial();
-
-    
+            jogador1.desativarEspecial();
         }
 
-        if(jogador2.getNome().equals("JOAO")
-                && jogador2.isEspecialAtivo()){
-
-                     System.out.println("JOAO P2 CONGELOU O P1");
+        if(jogador2.getNome().equals("JOAO") && jogador2.isEspecialAtivo()){
 
             jogador1.congelar(180);
-
             jogador2.desativarEspecial();
 
         }

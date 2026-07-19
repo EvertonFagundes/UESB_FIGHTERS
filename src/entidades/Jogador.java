@@ -132,33 +132,42 @@ public class Jogador extends Personagem {
     public void atualizar() {
 
         if(estado == Estado.VITORIA || estado == Estado.DERROTA){
-
             atualizarAnimacao();
             return;
         }
 
         atualizarCongelamento();
 
-        if(congelado){
-            System.out.println(getNome() + " está congelado");
-            estado = Estado.PARADO;
+        // Se está congelado
+        if (congelado) {
+
+            atualizarFisica();
+            atualizarDano();
+
+            // Se tomou dano, mostra a animação de dano
+            if (recebendoDano) {
+                atualizarAnimacao();
+                return;
+            }
+
+            // Mantém parado no primeiro sprite
+            mudarEstado(Estado.PARADO);
             frameAtual = 0;
             contadorAnimacao = 0;
-            //atualizarAnimacao();
 
             return;
-
         }
 
         boolean movendo = false;
 
-        if(recebendoDano){
-
+        // Se está recebendo dano
+        if (recebendoDano) {
             atualizarFisica();
             atualizarDano();
             atualizarAnimacao();
             return;
         }
+
 
         // =========================
         // PLAYER 1
@@ -194,8 +203,6 @@ public class Jogador extends Personagem {
                 pararBloqueio();
             }
             if(input.especialP1 && !especialUsado){
-                System.out.println("APERTEI O ESPECIAL P1");
-
                 usarEspecial();
                 especialUsado = true;
 
@@ -241,8 +248,6 @@ public class Jogador extends Personagem {
                 pararBloqueio();
             }
             if(input.especialP2 && !especialUsado){
-                System.out.println("APERTEI O ESPECIAL P2");
-
                 usarEspecial();
                 especialUsado = true;
 
@@ -281,7 +286,6 @@ public class Jogador extends Personagem {
 
     public void desativarEspecial(){
 
-        System.out.println("DESATIVOU ESPECIAL");
 
         Thread.dumpStack();
 
@@ -415,8 +419,6 @@ public class Jogador extends Personagem {
 
     @Override
     public void usarEspecial(){
-        System.out.println("ENTROU NO USAR ESPECIAL");
-        System.out.println("especialAtivo = " + especialAtivo);
 
         if(getEnergiaEspecial() < 100)
             return;
@@ -436,8 +438,6 @@ public class Jogador extends Personagem {
             ativarChuvaBiscoitos();
         }else if(getNome().equals("JOAO")){
             ativarHack();
-
-            System.out.println("Depois do hack = " + especialAtivo);
         }
 
     }
@@ -445,8 +445,6 @@ public class Jogador extends Personagem {
     private void ativarHack(){
         especialAtivo = true;
         tempoEspecial = DURACAO_ESPECIAL;
-        System.out.println("ATIVOU O HACK");
-        System.out.println("especialAtivo = " + especialAtivo);
     }
 
     private void ativarSuperForca(){
